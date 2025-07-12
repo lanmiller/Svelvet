@@ -43,6 +43,9 @@ const dispatch = createEventDispatcher();
 const selectedEdgeStore = writable(null);
 let graph = null;
 let direction = TD ? "TD" : "LR";
+let graphKey = `G-${id || Date.now()}`;
+graph = createGraph(graphKey, { zoom, direction, editable, locked, translation });
+graphStore.add(graph, graphKey);
 setContext("snapTo", snapTo);
 setContext("edgeStyle", edgeStyle);
 setContext("endStyles", endStyles);
@@ -111,15 +114,12 @@ onMount(() => {
   console.log("Graph component mounted with drawer:", drawer);
   const stateObject = localStorage.getItem("state");
   console.log("stateObject during onMount:", stateObject);
-  if (stateObject) {
-    graph = reloadStore(stateObject);
-    console.log("Este es el graph seteado mediante reloadStore(stateObject)", graph);
+  if (stateObject && graph) {
+    const reloadedGraph = reloadStore(stateObject);
+    console.log("Este es el graph seteado mediante reloadStore(stateObject)", reloadedGraph);
+    graph = reloadedGraph;
     graphStore.add(graph, graph.id);
     console.log("graphStore actualizado", graph);
-  } else {
-    let graphKey = `G-${id || graphStore.count() + 1}`;
-    graph = createGraph(graphKey, { zoom, direction, editable, locked, translation });
-    graphStore.add(graph, graphKey);
   }
   document.addEventListener("keydown", handleKeyDown);
   return () => {

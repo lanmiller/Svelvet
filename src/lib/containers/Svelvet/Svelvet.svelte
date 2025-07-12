@@ -126,6 +126,12 @@
 	let graph: GraphType | null = null;
 	let direction: 'TD' | 'LR' = TD ? 'TD' : 'LR';
 
+	// ✅ ИСПРАВЛЕНИЕ: Создаем граф сразу при инициализации компонента
+	// Это решает проблему с пустыми массивами элементов
+	let graphKey: GraphKey = `G-${id || Date.now()}`;
+	graph = createGraph(graphKey, { zoom, direction, editable, locked, translation });
+	graphStore.add(graph, graphKey);
+
 	setContext('snapTo', snapTo);
 	setContext('edgeStyle', edgeStyle);
 	setContext('endStyles', endStyles);
@@ -238,15 +244,16 @@
 		console.log('Graph component mounted with drawer:', drawer);
 		const stateObject = localStorage.getItem('state');
 		console.log('stateObject during onMount:', stateObject); // Aqui esta confirmado que localStorage.getItem('state') esta trayendo el grafico "PERFECTAMENTE BIEN" desde el localStorage
-		if (stateObject) {
-			graph = reloadStore(stateObject);
-			console.log('Este es el graph seteado mediante reloadStore(stateObject)', graph);
-			graphStore.add(graph, graph.id); //ERRROR: graphStore no se esta actuaklzando
+
+		// ✅ ИСПРАВЛЕНИЕ: Только загружаем состояние если оно есть
+		// Граф уже создан при инициализации компонента
+		if (stateObject && graph) {
+			const reloadedGraph = reloadStore(stateObject);
+			console.log('Este es el graph seteado mediante reloadStore(stateObject)', reloadedGraph);
+			// Обновляем существующий граф данными из localStorage
+			graph = reloadedGraph;
+			graphStore.add(graph, graph.id);
 			console.log('graphStore actualizado', graph);
-		} else {
-			let graphKey: GraphKey = `G-${id || graphStore.count() + 1}`;
-			graph = createGraph(graphKey, { zoom, direction, editable, locked, translation });
-			graphStore.add(graph, graphKey);
 		}
 
 		// 🎯 НОВОЕ: Добавляем обработчик клавиш
