@@ -4,6 +4,8 @@ import { createEventDispatcher, onMount, setContext } from "svelte";
 import { createGraph } from "../../utils";
 import { graphStore } from "../../stores";
 import { reloadStore } from "../../utils/savers/reloadStore";
+import { writable, get } from "svelte/store";
+import { tick } from "svelte";
 import Drawer from "../../components/Drawer/Drawer.svelte";
 </script>
 
@@ -38,6 +40,7 @@ export let title = "";
 export let fixedZoom = false;
 export let pannable = true;
 const dispatch = createEventDispatcher();
+const selectedEdgeStore = writable(null);
 let graph = null;
 let direction = TD ? "TD" : "LR";
 setContext("snapTo", snapTo);
@@ -47,6 +50,63 @@ setContext("graphEdge", edge);
 setContext("raiseEdgesOnSelect", raiseEdgesOnSelect);
 setContext("edgesAboveNode", edgesAboveNode);
 setContext("graph", graph);
+setContext("selectedEdgeStore", selectedEdgeStore);
+function handleKeyDown(event) {
+  console.log(`\u{1F3B9} \u041D\u0430\u0436\u0430\u0442\u0430 \u043A\u043B\u0430\u0432\u0438\u0448\u0430: ${event.key}`);
+  if ((event.key === "Delete" || event.key === "Backspace") && graph) {
+    const selectedEdgeId = $selectedEdgeStore;
+    console.log(`\u{1F3AF} \u0412\u044B\u0434\u0435\u043B\u0435\u043D\u043D\u043E\u0435 \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u0435: ${selectedEdgeId}`);
+    if (selectedEdgeId) {
+      try {
+        console.log(`\u{1F5D1}\uFE0F \u0423\u0434\u0430\u043B\u044F\u0435\u043C \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u0435: ${selectedEdgeId}`);
+        const allEdges = edgeStore.getAll();
+        console.log(`\u{1F50D} \u0412\u0441\u0435\u0433\u043E \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u0439 \u0432 store:`, allEdges.length);
+        const targetEdge = allEdges.find((edge2) => edge2.id === selectedEdgeId);
+        console.log(`\u{1F50D} \u041D\u0430\u0439\u0434\u0435\u043D\u043D\u043E\u0435 \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u0435:`, targetEdge);
+        if (targetEdge) {
+          const edgeKeys = edgeStore.match(targetEdge.source, targetEdge.target);
+          console.log(`\u{1F50D} \u041D\u0430\u0439\u0434\u0435\u043D\u043D\u044B\u0435 \u043A\u043B\u044E\u0447\u0438 \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u044F:`, edgeKeys);
+          if (edgeKeys.length > 0) {
+            const deleted = edgeStore.delete(edgeKeys[0]);
+            console.log(`\u{1F5D1}\uFE0F \u0420\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442 \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u044F:`, deleted);
+            if (deleted) {
+              selectedEdgeStore.set(null);
+              console.log(`\u2705 \u0421\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u0435 ${selectedEdgeId} \u0443\u0434\u0430\u043B\u0435\u043D\u043E \u0443\u0441\u043F\u0435\u0448\u043D\u043E`);
+            } else {
+              console.warn(`\u274C \u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0443\u0434\u0430\u043B\u0438\u0442\u044C \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u0435 ${selectedEdgeId}`);
+            }
+          } else {
+            console.warn(`\u274C \u041D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u044B \u043A\u043B\u044E\u0447\u0438 \u0434\u043B\u044F \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u044F ${selectedEdgeId}`);
+          }
+        } else {
+          console.warn(`\u274C \u0421\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u0435 ${selectedEdgeId} \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E \u0432 store`);
+        }
+      } catch (error) {
+        console.error(`\u274C \u041E\u0448\u0438\u0431\u043A\u0430 \u043F\u0440\u0438 \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u0438 \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u044F:`, error);
+      }
+    }
+  }
+  if (event.key === "Escape") {
+    selectedEdgeStore.set(null);
+  }
+}
+function handleBackgroundClick(event) {
+  const target = event.target;
+  const isEdgeClick = target.closest(".edge-wrapper") || target.closest("[data-edge-id]") || target.tagName === "path" || target.classList.contains("edge-path") || target.classList.contains("edge-click-area");
+  const isNodeClick = target.closest(".svelvet-node") || target.closest('[id^="N-"]') || target.closest(".node-wrapper") || target.closest("[data-node-id]");
+  const isAnchorClick = target.closest(".anchor") || target.closest('[id^="A-"]') || target.closest("[data-anchor]");
+  console.log(`\u{1F5B1}\uFE0F \u041A\u043B\u0438\u043A \u043D\u0430 \u0433\u0440\u0430\u0444\u0435:`, {
+    target: target.tagName,
+    className: target.className,
+    isEdgeClick,
+    isNodeClick,
+    isAnchorClick
+  });
+  if (!isEdgeClick && !isNodeClick && !isAnchorClick) {
+    console.log(`\u{1F504} \u0421\u0431\u0440\u0430\u0441\u044B\u0432\u0430\u0435\u043C \u0432\u044B\u0434\u0435\u043B\u0435\u043D\u0438\u0435 \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u044F \u043F\u0440\u0438 \u043A\u043B\u0438\u043A\u0435 \u043D\u0430 \u0444\u043E\u043D`);
+    selectedEdgeStore.set(null);
+  }
+}
 onMount(() => {
   console.log("Graph component mounted with drawer:", drawer);
   const stateObject = localStorage.getItem("state");
@@ -61,6 +121,10 @@ onMount(() => {
     graph = createGraph(graphKey, { zoom, direction, editable, locked, translation });
     graphStore.add(graph, graphKey);
   }
+  document.addEventListener("keydown", handleKeyDown);
+  return () => {
+    document.removeEventListener("keydown", handleKeyDown);
+  };
 });
 $:
   backgroundExists = $$slots.background;
@@ -105,7 +169,6 @@ export function disconnect(source, target) {
 <!-- Aqui se renderiza el grafico -->
 {#if graph}
 	<Graph
-	
 		{width}
 		{height}
 		{toggle}
@@ -125,6 +188,11 @@ export function disconnect(source, target) {
 		{title}
 		{contrast}
 		on:edgeDrop
+		on:click={handleBackgroundClick}
+		on:nodeClicked={() => {
+			console.log('🖱️ Клик по ноде - сбрасываем выделение соединения');
+			selectedEdgeStore.set(null);
+		}}
 	>
 		{#if mermaid.length}
 			<FlowChart {mermaid} {mermaidConfig} />
@@ -136,7 +204,6 @@ export function disconnect(source, target) {
 		<slot name="toggle" slot="toggle" />
 		<slot name="drawer" slot="drawer" />
 		<slot name="contrast" slot="contrast" />
-		
 	</Graph>
 {:else}
 	<div

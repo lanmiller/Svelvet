@@ -9,6 +9,7 @@ const tagsToIgnore = /* @__PURE__ */ new Set(["INPUT", "SELECT", "BUTTON", "TEXT
 <script>const mounted = getContext("mounted");
 const duplicate = getContext("duplicate");
 const graphDOMElement = getContext("graphDOMElement");
+const selectedEdgeStore = getContext("selectedEdgeStore");
 const dispatch = createEventDispatcher();
 export let node;
 export let isDefault;
@@ -102,6 +103,10 @@ function handleNodeClicked(e) {
     return;
   e.preventDefault();
   dispatch("nodeClicked", { node, e });
+  if (selectedEdgeStore) {
+    console.log("\u{1F5B1}\uFE0F \u041A\u043B\u0438\u043A \u043F\u043E \u043D\u043E\u0434\u0435 - \u0441\u0431\u0440\u0430\u0441\u044B\u0432\u0430\u0435\u043C \u0432\u044B\u0434\u0435\u043B\u0435\u043D\u0438\u0435 \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u044F");
+    selectedEdgeStore.set(null);
+  }
   if ($locked || $nodeLock)
     return;
   if ("touches" in e) {

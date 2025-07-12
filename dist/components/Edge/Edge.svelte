@@ -1,5 +1,7 @@
 <script context="module">import { calculateStepPath, calculateRadius, calculatePath } from "../../utils/calculators";
-import { calculateSmartStepPath } from "../../utils/calculators/calculateStepPath";
+import {
+  calculateSmartStepPath
+} from "../../utils/calculators/calculateStepPath";
 import { onMount, onDestroy, getContext, afterUpdate } from "svelte";
 import { directionVectors, stepBuffer } from "../../constants";
 import { buildPath, rotateVector } from "../../utils/helpers";
@@ -23,6 +25,7 @@ const edgeStyle = getContext("edgeStyle");
 const endStyles = getContext("endStyles");
 const raiseEdgesOnSelect = getContext("raiseEdgesOnSelect");
 const edgesAboveNode = getContext("edgesAboveNode");
+const selectedEdgeStore = getContext("selectedEdgeStore");
 export let edge = getContext("edge");
 export let straight = edgeStyle === "straight";
 export let step = edgeStyle === "step";
@@ -60,6 +63,7 @@ const sourceNodePositionStore = source.node?.position;
 const targetNodePositionStore = target.node?.position;
 const edgeType = edge.type;
 const edgeKey = edge.id;
+let isSelected = false;
 let path;
 let DOMPath;
 let labelPoint = { x: 0, y: 0 };
@@ -69,6 +73,10 @@ let sourceAbove = false;
 let sourceLeft = false;
 let hovering = false;
 let edgeElement;
+$:
+  if (selectedEdgeStore) {
+    isSelected = $selectedEdgeStore === edgeKey;
+  }
 $:
   dynamic = $sourceDynamic || $targetDynamic;
 $:
@@ -81,6 +89,20 @@ $:
   labelText = label || $edgeLabel || "";
 $:
   renderLabel = labelText || $$slots.label;
+function handleEdgeClick(event) {
+  event.stopPropagation();
+  event.preventDefault();
+  console.log(`\u{1F5B1}\uFE0F \u041A\u043B\u0438\u043A \u043F\u043E \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u044E: ${edgeKey}`);
+  if (selectedEdgeStore && typeof selectedEdgeStore.set === "function") {
+    selectedEdgeStore.set(edgeKey);
+    console.log(`\u2705 \u0421\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u0435 ${edgeKey} \u0432\u044B\u0434\u0435\u043B\u0435\u043D\u043E`);
+  } else {
+    console.warn("selectedEdgeStore \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D \u0438\u043B\u0438 \u043D\u0435 \u044F\u0432\u043B\u044F\u0435\u0442\u0441\u044F \u0441\u0442\u043E\u0440\u043E\u043C");
+  }
+  if (edgeClick) {
+    edgeClick();
+  }
+}
 $:
   sourcePosition = $sourcePositionStore;
 $:
@@ -234,11 +256,20 @@ $:
       direction: directionVectors[$targetDirection]
     };
     let steps;
-    if (smartStep || orthogonal) {
+    if (smartStep) {
       const options = {
         cornerRadius,
         stepBuffer,
         bendingRules: "smart",
+        ...orthogonalOptions
+      };
+      steps = calculateSmartStepPath(sourceObject, targetObject, options);
+    } else if (orthogonal) {
+      const options = {
+        cornerRadius,
+        stepBuffer,
+        bendingRules: "smart",
+        preferredDirection: "auto",
         ...orthogonalOptions
       };
       steps = calculateSmartStepPath(sourceObject, targetObject, options);
@@ -304,7 +335,12 @@ $:
 </script>
 
 {#if source && target}
-	<svg class="edges-wrapper" style:z-index={zIndex} bind:this={edgeElement}>
+	<svg
+		class="edges-wrapper"
+		class:selected={isSelected}
+		style:z-index={zIndex}
+		bind:this={edgeElement}
+	>
 		{#if start || end}
 			<defs>
 				<marker
@@ -335,11 +371,13 @@ $:
 			role="presentation"
 			id={edgeKey + '-target'}
 			class="target"
-			class:cursor={edgeKey === 'cursor' || (!edgeClick && !enableHover)}
-			style:cursor={edgeClick || hovering ? 'pointer' : 'move'}
-			style:--prop-target-edge-color={edgeClick || hovering ? targetColor || null : 'transparent'}
+			class:cursor={edgeKey === 'cursor'}
+			class:selected={isSelected}
+			style:cursor="pointer"
+			style:--prop-target-edge-color={hovering ? targetColor || '#64748b' : 'transparent'}
 			d={path}
-			on:mousedown={edgeClick}
+			on:click={handleEdgeClick}
+			on:mousedown|stopPropagation
 			on:mouseenter={() => (hovering = true)}
 			on:mouseleave={() => (hovering = false)}
 			bind:this={DOMPath}
@@ -349,6 +387,7 @@ $:
 				id={edgeKey}
 				class="edge"
 				class:animate
+				class:selected={isSelected}
 				d={path}
 				style:--prop-edge-color={finalColor}
 				marker-end={end === 'arrow' ? `url(#${edgeKey + '-end-arrow'})` : ''}
@@ -385,6 +424,24 @@ $:
 		stroke-width: var(--prop-stroke-width, var(--edge-width, var(--default-edge-width)));
 		contain: strict;
 	}
+
+	/* 🎯 НОВОЕ: Стили для выделенного соединения */
+	.edge.selected {
+		stroke: #ff4444 !important;
+		stroke-width: 4px !important;
+		filter: drop-shadow(0 0 6px rgba(255, 68, 68, 0.5));
+	}
+
+	.target.selected {
+		stroke: #ff4444 !important;
+		stroke-width: 12px !important;
+		opacity: 0.3 !important;
+	}
+
+	.edges-wrapper.selected {
+		z-index: 10000 !important;
+	}
+
 	.label-wrapper {
 		display: flex;
 		justify-content: center;
@@ -407,16 +464,18 @@ $:
 
 	.target {
 		pointer-events: stroke;
-		stroke: none;
-		stroke-width: calc(var(--edge-width, var(--default-edge-width)) + 8px);
+		stroke: transparent;
+		stroke-width: 20px; /* Увеличиваем область клика */
+		fill: none;
+		cursor: pointer !important;
 	}
 
 	.target:hover {
-		stroke: var(
-			--prop-target-edge-color,
-			var(--target-edge-color, var(--default-target-edge-color))
-		);
-		opacity: 50%;
+		stroke: rgba(100, 116, 139, 0.3); /* Серый полупрозрачный при ховере */
+	}
+
+	.target.selected:hover {
+		stroke: rgba(255, 68, 68, 0.5); /* Красный полупрозрачный для выбранного */
 	}
 
 	.cursor {

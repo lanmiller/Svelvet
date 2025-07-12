@@ -15,6 +15,8 @@
 	const mounted = getContext<Writable<number>>('mounted');
 	const duplicate = getContext<Writable<boolean>>('duplicate');
 	const graphDOMElement = getContext<Writable<HTMLElement>>('graphDOMElement');
+	// 🎯 NUEVO: Obtenemos el selectedEdgeStore del contexto
+	const selectedEdgeStore = getContext<Writable<string | null>>('selectedEdgeStore');
 
 	const dispatch = createEventDispatcher();
 
@@ -147,6 +149,12 @@
 
 		// Dispatch our nodeClicked event for developer use
 		dispatch('nodeClicked', { node, e });
+
+		// 🎯 НОВОЕ: Сбрасываем выделение соединения при клике на ноду
+		if (selectedEdgeStore) {
+			console.log('🖱️ Клик по ноде - сбрасываем выделение соединения');
+			selectedEdgeStore.set(null);
+		}
 
 		// If the node or graph is locked, don't do anything
 		if ($locked || $nodeLock) return; // If the node is locked, don't do anything

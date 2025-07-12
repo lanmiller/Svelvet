@@ -647,7 +647,7 @@
 	bind:this={$graphDOMElement}
 	tabindex={0}
 >
-	<GraphRenderer {isMovable}>
+	<GraphRenderer {isMovable} on:nodeClicked>
 		{#if $editing}
 			<Editor editing={$editing} />
 		{/if}

@@ -1,6 +1,9 @@
 <script context="module" lang="ts">
 	import { calculateStepPath, calculateRadius, calculatePath } from '$lib/utils/calculators';
-	import { calculateSmartStepPath, type OrthogonalEdgeOptions } from '$lib/utils/calculators/calculateStepPath';
+	import {
+		calculateSmartStepPath,
+		type OrthogonalEdgeOptions
+	} from '$lib/utils/calculators/calculateStepPath';
 	import { onMount, onDestroy, getContext, afterUpdate } from 'svelte';
 	import { directionVectors, stepBuffer } from '$lib/constants';
 	import { buildPath, rotateVector } from '$lib/utils/helpers';
@@ -30,6 +33,8 @@
 	const endStyles = getContext<Array<EndStyle>>('endStyles');
 	const raiseEdgesOnSelect = getContext('raiseEdgesOnSelect');
 	const edgesAboveNode = getContext('edgesAboveNode');
+	// 🎯 НОВОЕ: Контекст для управления выделенными соединениями
+	const selectedEdgeStore = getContext('selectedEdgeStore');
 
 	// Props
 	export let edge: WritableEdge = getContext<WritableEdge>('edge');
@@ -81,6 +86,9 @@
 	const edgeType = edge.type;
 	const edgeKey = edge.id;
 
+	// 🎯 НОВОЕ: Состояние выделения
+	let isSelected = false;
+
 	// Reactive variables
 	let path: string;
 	let DOMPath: SVGPathElement; // The SVG path element used for calculating the midpoint of the curve for labels
@@ -92,6 +100,11 @@
 	let hovering = false;
 	let edgeElement: SVGElement;
 
+	// 🎯 НОВОЕ: Отслеживаем выделенное соединение
+	$: if (selectedEdgeStore) {
+		isSelected = $selectedEdgeStore === edgeKey;
+	}
+
 	// Reactive declarations
 	$: dynamic = $sourceDynamic || $targetDynamic;
 	$: edgeColor = source?.edgeColor || target?.edgeColor || null;
@@ -99,6 +112,27 @@
 	$: finalColor = color || $edgeColor || null;
 	$: labelText = label || $edgeLabel || '';
 	$: renderLabel = labelText || $$slots.label; // Boolean that determines whether or not to render the label
+
+	// 🎯 НОВОЕ: Обработчик клика по соединению
+	function handleEdgeClick(event: MouseEvent) {
+		event.stopPropagation();
+		event.preventDefault();
+
+		console.log(`🖱️ Клик по соединению: ${edgeKey}`);
+
+		// Выделяем это соединение
+		if (selectedEdgeStore && typeof selectedEdgeStore.set === 'function') {
+			selectedEdgeStore.set(edgeKey);
+			console.log(`✅ Соединение ${edgeKey} выделено`);
+		} else {
+			console.warn('selectedEdgeStore не найден или не является стором');
+		}
+
+		// Вызываем пользовательский обработчик если есть
+		if (edgeClick) {
+			edgeClick();
+		}
+	}
 
 	// Subscriptions
 	$: sourcePosition = $sourcePositionStore;
@@ -257,12 +291,22 @@
 		let steps;
 
 		// Выбираем алгоритм в зависимости от типа соединения
-		if (smartStep || orthogonal) {
-			// Используем умный алгоритм с опциями
+		if (smartStep) {
+			// Умный алгоритм
 			const options = {
 				cornerRadius,
 				stepBuffer,
 				bendingRules: 'smart',
+				...orthogonalOptions
+			};
+			steps = calculateSmartStepPath(sourceObject, targetObject, options);
+		} else if (orthogonal) {
+			// Ортогональный алгоритм (умный с другими настройками)
+			const options = {
+				cornerRadius,
+				stepBuffer,
+				bendingRules: 'smart',
+				preferredDirection: 'auto',
 				...orthogonalOptions
 			};
 			steps = calculateSmartStepPath(sourceObject, targetObject, options);
@@ -351,7 +395,12 @@
 </script>
 
 {#if source && target}
-	<svg class="edges-wrapper" style:z-index={zIndex} bind:this={edgeElement}>
+	<svg
+		class="edges-wrapper"
+		class:selected={isSelected}
+		style:z-index={zIndex}
+		bind:this={edgeElement}
+	>
 		{#if start || end}
 			<defs>
 				<marker
@@ -382,11 +431,13 @@
 			role="presentation"
 			id={edgeKey + '-target'}
 			class="target"
-			class:cursor={edgeKey === 'cursor' || (!edgeClick && !enableHover)}
-			style:cursor={edgeClick || hovering ? 'pointer' : 'move'}
-			style:--prop-target-edge-color={edgeClick || hovering ? targetColor || null : 'transparent'}
+			class:cursor={edgeKey === 'cursor'}
+			class:selected={isSelected}
+			style:cursor="pointer"
+			style:--prop-target-edge-color={hovering ? targetColor || '#64748b' : 'transparent'}
 			d={path}
-			on:mousedown={edgeClick}
+			on:click={handleEdgeClick}
+			on:mousedown|stopPropagation
 			on:mouseenter={() => (hovering = true)}
 			on:mouseleave={() => (hovering = false)}
 			bind:this={DOMPath}
@@ -396,6 +447,7 @@
 				id={edgeKey}
 				class="edge"
 				class:animate
+				class:selected={isSelected}
 				d={path}
 				style:--prop-edge-color={finalColor}
 				marker-end={end === 'arrow' ? `url(#${edgeKey + '-end-arrow'})` : ''}
@@ -432,6 +484,24 @@
 		stroke-width: var(--prop-stroke-width, var(--edge-width, var(--default-edge-width)));
 		contain: strict;
 	}
+
+	/* 🎯 НОВОЕ: Стили для выделенного соединения */
+	.edge.selected {
+		stroke: #ff4444 !important;
+		stroke-width: 4px !important;
+		filter: drop-shadow(0 0 6px rgba(255, 68, 68, 0.5));
+	}
+
+	.target.selected {
+		stroke: #ff4444 !important;
+		stroke-width: 12px !important;
+		opacity: 0.3 !important;
+	}
+
+	.edges-wrapper.selected {
+		z-index: 10000 !important;
+	}
+
 	.label-wrapper {
 		display: flex;
 		justify-content: center;
@@ -454,16 +524,18 @@
 
 	.target {
 		pointer-events: stroke;
-		stroke: none;
-		stroke-width: calc(var(--edge-width, var(--default-edge-width)) + 8px);
+		stroke: transparent;
+		stroke-width: 20px; /* Увеличиваем область клика */
+		fill: none;
+		cursor: pointer !important;
 	}
 
 	.target:hover {
-		stroke: var(
-			--prop-target-edge-color,
-			var(--target-edge-color, var(--default-target-edge-color))
-		);
-		opacity: 50%;
+		stroke: rgba(100, 116, 139, 0.3); /* Серый полупрозрачный при ховере */
+	}
+
+	.target.selected:hover {
+		stroke: rgba(255, 68, 68, 0.5); /* Красный полупрозрачный для выбранного */
 	}
 
 	.cursor {

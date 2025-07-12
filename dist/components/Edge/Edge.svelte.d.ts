@@ -32,6 +32,8 @@ declare const __propDef: {
         destroy?: (() => void) | undefined;
     };
     events: {
+        mousedown: MouseEvent;
+    } & {
         [evt: string]: CustomEvent<any>;
     };
     slots: {

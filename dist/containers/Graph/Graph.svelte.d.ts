@@ -27,6 +27,8 @@ declare const __propDef: {
         contrast?: boolean | undefined;
     };
     events: {
+        nodeClicked: CustomEvent<any>;
+    } & {
         [evt: string]: CustomEvent<any>;
     };
     slots: {

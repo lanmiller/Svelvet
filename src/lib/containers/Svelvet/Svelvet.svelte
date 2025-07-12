@@ -1,11 +1,13 @@
 <script context="module" lang="ts">
-	
 	import Graph from '../Graph/Graph.svelte';
 	import FlowChart from '$lib/components/FlowChart/FlowChart.svelte';
 	import { createEventDispatcher, onMount, setContext } from 'svelte';
 	import { createGraph } from '$lib/utils/';
 	import { graphStore } from '$lib/stores';
 	import { reloadStore } from '$lib/utils/savers/reloadStore';
+	// 🎯 НОВОЕ: Импорт для управления выделенными соединениями
+	import { writable, get } from 'svelte/store';
+	import { tick } from 'svelte';
 	import type { ComponentType } from 'svelte';
 	import type {
 		Graph as GraphType,
@@ -20,7 +22,6 @@
 </script>
 
 <script lang="ts">
-	
 	// Props
 	export let mermaid = '';
 	/**
@@ -34,9 +35,6 @@
 	export let id: number | string = 0;
 	export let snapTo = 0;
 
-	
-   
-	
 	/**
 	 * @default 1
 	 * @description Sets initial zoom level of the graph. This value
@@ -121,6 +119,9 @@
 		disconnection: SvelvetConnectionEvent;
 	}>();
 
+	// 🎯 НОВОЕ: Стор для управления выделенными соединениями
+	const selectedEdgeStore = writable<string | null>(null);
+
 	// let graph: GraphType;
 	let graph: GraphType | null = null;
 	let direction: 'TD' | 'LR' = TD ? 'TD' : 'LR';
@@ -132,6 +133,103 @@
 	setContext('raiseEdgesOnSelect', raiseEdgesOnSelect);
 	setContext('edgesAboveNode', edgesAboveNode);
 	setContext('graph', graph);
+	// 🎯 НОВОЕ: Передаем selectedEdgeStore в контекст
+	setContext('selectedEdgeStore', selectedEdgeStore);
+
+	// 🎯 НОВОЕ: Обработчик клавиш для удаления соединений
+	function handleKeyDown(event: KeyboardEvent) {
+		console.log(`🎹 Нажата клавиша: ${event.key}`);
+
+		// Удаляем выделенное соединение по клавише Delete или Backspace
+		if ((event.key === 'Delete' || event.key === 'Backspace') && graph) {
+			const selectedEdgeId = $selectedEdgeStore;
+			console.log(`🎯 Выделенное соединение: ${selectedEdgeId}`);
+
+			if (selectedEdgeId) {
+				try {
+					console.log(`🗑️ Удаляем соединение: ${selectedEdgeId}`);
+
+					// Получаем все соединения и ищем нужное по ID
+					const allEdges = edgeStore.getAll();
+					console.log(`🔍 Всего соединений в store:`, allEdges.length);
+
+					// Ищем соединение по ID
+					const targetEdge = allEdges.find((edge) => edge.id === selectedEdgeId);
+					console.log(`🔍 Найденное соединение:`, targetEdge);
+
+					if (targetEdge) {
+						// Используем метод match для получения ключа соединения
+						const edgeKeys = edgeStore.match(targetEdge.source, targetEdge.target);
+						console.log(`🔍 Найденные ключи соединения:`, edgeKeys);
+
+						if (edgeKeys.length > 0) {
+							// Удаляем соединение по найденному ключу
+							const deleted = edgeStore.delete(edgeKeys[0]);
+							console.log(`🗑️ Результат удаления:`, deleted);
+
+							if (deleted) {
+								// Сбрасываем выделение
+								selectedEdgeStore.set(null);
+								console.log(`✅ Соединение ${selectedEdgeId} удалено успешно`);
+							} else {
+								console.warn(`❌ Не удалось удалить соединение ${selectedEdgeId}`);
+							}
+						} else {
+							console.warn(`❌ Не найдены ключи для соединения ${selectedEdgeId}`);
+						}
+					} else {
+						console.warn(`❌ Соединение ${selectedEdgeId} не найдено в store`);
+					}
+				} catch (error) {
+					console.error(`❌ Ошибка при удалении соединения:`, error);
+				}
+			}
+		}
+
+		// Сбрасываем выделение по клавише Escape
+		if (event.key === 'Escape') {
+			selectedEdgeStore.set(null);
+		}
+	}
+
+	// 🎯 НОВОЕ: Сброс выделения при клике на фон
+	function handleBackgroundClick(event) {
+		// Проверяем что клик действительно по фону, а не по ноде или соединению
+		const target = event.target;
+
+		// Проверяем, что клик не по Edge компоненту
+		const isEdgeClick =
+			target.closest('.edge-wrapper') ||
+			target.closest('[data-edge-id]') ||
+			target.tagName === 'path' ||
+			target.classList.contains('edge-path') ||
+			target.classList.contains('edge-click-area');
+
+		// Проверяем, что клик не по Node компоненту
+		const isNodeClick =
+			target.closest('.svelvet-node') ||
+			target.closest('[id^="N-"]') ||
+			target.closest('.node-wrapper') ||
+			target.closest('[data-node-id]');
+
+		// Проверяем, что клик не по Anchor компоненту
+		const isAnchorClick =
+			target.closest('.anchor') || target.closest('[id^="A-"]') || target.closest('[data-anchor]');
+
+		console.log(`🖱️ Клик на графе:`, {
+			target: target.tagName,
+			className: target.className,
+			isEdgeClick,
+			isNodeClick,
+			isAnchorClick
+		});
+
+		// Если клик по фону (не по элементам графа), сбрасываем выделение
+		if (!isEdgeClick && !isNodeClick && !isAnchorClick) {
+			console.log(`🔄 Сбрасываем выделение соединения при клике на фон`);
+			selectedEdgeStore.set(null);
+		}
+	}
 
 	// function to load a graph from local storage
 	// occurs after Svelvet renders
@@ -150,6 +248,14 @@
 			graph = createGraph(graphKey, { zoom, direction, editable, locked, translation });
 			graphStore.add(graph, graphKey);
 		}
+
+		// 🎯 НОВОЕ: Добавляем обработчик клавиш
+		document.addEventListener('keydown', handleKeyDown);
+
+		return () => {
+			// Очищаем обработчик при размонтировании
+			document.removeEventListener('keydown', handleKeyDown);
+		};
 	});
 
 	$: backgroundExists = $$slots.background;
@@ -192,15 +298,12 @@
 		const edgeKey = graph.edges.match(sourceAnchor, targetAnchor);
 		if (!edgeKey) return;
 		graph.edges.delete(edgeKey[0]);
-		
 	}
-	
 </script>
 
 <!-- Aqui se renderiza el grafico -->
 {#if graph}
 	<Graph
-	
 		{width}
 		{height}
 		{toggle}
@@ -220,6 +323,11 @@
 		{title}
 		{contrast}
 		on:edgeDrop
+		on:click={handleBackgroundClick}
+		on:nodeClicked={() => {
+			console.log('🖱️ Клик по ноде - сбрасываем выделение соединения');
+			selectedEdgeStore.set(null);
+		}}
 	>
 		{#if mermaid.length}
 			<FlowChart {mermaid} {mermaidConfig} />
@@ -231,7 +339,6 @@
 		<slot name="toggle" slot="toggle" />
 		<slot name="drawer" slot="drawer" />
 		<slot name="contrast" slot="contrast" />
-		
 	</Graph>
 {:else}
 	<div
