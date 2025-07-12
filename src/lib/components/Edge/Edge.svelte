@@ -1,5 +1,6 @@
 <script context="module" lang="ts">
 	import { calculateStepPath, calculateRadius, calculatePath } from '$lib/utils/calculators';
+	import { calculateSmartStepPath, type OrthogonalEdgeOptions } from '$lib/utils/calculators/calculateStepPath';
 	import { onMount, onDestroy, getContext, afterUpdate } from 'svelte';
 	import { directionVectors, stepBuffer } from '$lib/constants';
 	import { buildPath, rotateVector } from '$lib/utils/helpers';
@@ -34,6 +35,13 @@
 	export let edge: WritableEdge = getContext<WritableEdge>('edge');
 	export let straight = edgeStyle === 'straight';
 	export let step = edgeStyle === 'step';
+	// 🎯 НОВЫЕ PROPS ДЛЯ КАСТОМНЫХ ОРТОГОНАЛЬНЫХ СОЕДИНЕНИЙ
+	export let orthogonal = edgeStyle === 'orthogonal';
+	export let smartStep = edgeStyle === 'smart-step';
+	export let minimalStep = edgeStyle === 'minimal-step';
+	export let directStep = edgeStyle === 'direct-step';
+	export let orthogonalOptions: OrthogonalEdgeOptions = {};
+
 	export let start = endStyles[0];
 	export let end = endStyles[1];
 	export let animate = false;
@@ -229,7 +237,12 @@
 		});
 	}
 
-	$: if (step && edgeKey !== 'cursor' && !($edgeType && $edgeType === 'bezier')) {
+	// 🎯 ЛОГИКА ДЛЯ ВСЕХ ТИПОВ ОРТОГОНАЛЬНЫХ СОЕДИНЕНИЙ
+	$: if (
+		(step || orthogonal || smartStep || minimalStep || directStep) &&
+		edgeKey !== 'cursor' &&
+		!($edgeType && $edgeType === 'bezier')
+	) {
 		const sourceObject = {
 			x: sourceX,
 			y: sourceY,
@@ -241,7 +254,40 @@
 			direction: directionVectors[$targetDirection]
 		};
 
-		const steps = calculateStepPath(sourceObject, targetObject, stepBuffer);
+		let steps;
+
+		// Выбираем алгоритм в зависимости от типа соединения
+		if (smartStep || orthogonal) {
+			// Используем умный алгоритм с опциями
+			const options = {
+				cornerRadius,
+				stepBuffer,
+				bendingRules: 'smart',
+				...orthogonalOptions
+			};
+			steps = calculateSmartStepPath(sourceObject, targetObject, options);
+		} else if (minimalStep) {
+			// Минимальные изгибы
+			const options = {
+				cornerRadius,
+				stepBuffer,
+				bendingRules: 'minimal',
+				...orthogonalOptions
+			};
+			steps = calculateSmartStepPath(sourceObject, targetObject, options);
+		} else if (directStep) {
+			// Прямые соединения
+			const options = {
+				cornerRadius,
+				stepBuffer,
+				bendingRules: 'direct',
+				...orthogonalOptions
+			};
+			steps = calculateSmartStepPath(sourceObject, targetObject, options);
+		} else {
+			// Стандартный step алгоритм
+			steps = calculateStepPath(sourceObject, targetObject, stepBuffer);
+		}
 
 		const buildArcStringIfNeeded = (
 			step: { x: number; y: number },

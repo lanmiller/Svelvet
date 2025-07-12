@@ -9,6 +9,244 @@ export interface VectorPlusPosition extends XYPair {
 	direction: XYPair;
 }
 
+// 🎯 НОВЫЕ ИНТЕРФЕЙСЫ ДЛЯ КАСТОМИЗАЦИИ
+export interface OrthogonalEdgeOptions {
+	cornerRadius?: number;
+	stepBuffer?: number;
+	bendingRules?: 'smart' | 'minimal' | 'direct';
+	preferredDirection?: 'horizontal' | 'vertical' | 'auto';
+	avoidOverlap?: boolean;
+	maxBends?: number;
+}
+
+export interface SmartStepPathOptions extends OrthogonalEdgeOptions {
+	// Дополнительные опции для умного алгоритма
+	nodeWidth?: number;
+	nodeHeight?: number;
+	gridSize?: number;
+	obstacleAvoidance?: boolean;
+}
+
+// 🎯 НОВАЯ УЛУЧШЕННАЯ ФУНКЦИЯ
+export function calculateSmartStepPath(
+	source: VectorPlusPosition,
+	target: VectorPlusPosition,
+	options: SmartStepPathOptions = {}
+): XYPair[] {
+	// Значения по умолчанию
+	const {
+		cornerRadius = 8,
+		stepBuffer = 40,
+		bendingRules = 'smart',
+		preferredDirection = 'auto',
+		avoidOverlap = true,
+		maxBends = 4,
+		nodeWidth = 200,
+		nodeHeight = 100,
+		gridSize = 25,
+		obstacleAvoidance = false
+	} = options;
+
+	const steps: XYPair[] = [];
+	const deltaX = target.x - source.x;
+	const deltaY = target.y - source.y;
+	const absX = Math.abs(deltaX);
+	const absY = Math.abs(deltaY);
+
+	// Определяем предпочтительное направление
+	let actualPreferredDirection = preferredDirection;
+	if (preferredDirection === 'auto') {
+		actualPreferredDirection = absX > absY ? 'horizontal' : 'vertical';
+	}
+
+	// Алгоритм для разных правил изгибов
+	switch (bendingRules) {
+		case 'minimal':
+			return calculateMinimalBendPath(source, target, stepBuffer, actualPreferredDirection);
+
+		case 'direct':
+			return calculateDirectPath(source, target, stepBuffer);
+
+		case 'smart':
+		default:
+			return calculateSmartPath(source, target, stepBuffer, actualPreferredDirection, maxBends, avoidOverlap);
+	}
+}
+
+// 🎯 АЛГОРИТМ МИНИМАЛЬНЫХ ИЗГИБОВ (L-образная форма)
+function calculateMinimalBendPath(
+	source: VectorPlusPosition,
+	target: VectorPlusPosition,
+	buffer: number,
+	preferredDirection: 'horizontal' | 'vertical'
+): XYPair[] {
+	const steps: XYPair[] = [];
+	const deltaX = target.x - source.x;
+	const deltaY = target.y - source.y;
+
+	// Выход из исходной ноды
+	const sourceExit = {
+		x: source.direction.x * buffer,
+		y: source.direction.y * buffer
+	};
+	steps.push(sourceExit);
+
+	if (preferredDirection === 'horizontal') {
+		// Сначала горизонтально, потом вертикально
+		const horizontalStep = {
+			x: deltaX - sourceExit.x - (target.direction.x * buffer),
+			y: 0
+		};
+		const verticalStep = {
+			x: 0,
+			y: deltaY - sourceExit.y - (target.direction.y * buffer)
+		};
+
+		if (horizontalStep.x !== 0) steps.push(horizontalStep);
+		if (verticalStep.y !== 0) steps.push(verticalStep);
+	} else {
+		// Сначала вертикально, потом горизонтально
+		const verticalStep = {
+			x: 0,
+			y: deltaY - sourceExit.y - (target.direction.y * buffer)
+		};
+		const horizontalStep = {
+			x: deltaX - sourceExit.x - (target.direction.x * buffer),
+			y: 0
+		};
+
+		if (verticalStep.y !== 0) steps.push(verticalStep);
+		if (horizontalStep.x !== 0) steps.push(horizontalStep);
+	}
+
+	// Вход в целевую ноду
+	const targetEntry = {
+		x: target.direction.x * buffer,
+		y: target.direction.y * buffer
+	};
+	steps.push(targetEntry);
+
+	return steps;
+}
+
+// 🎯 АЛГОРИТМ ПРЯМОГО ПУТИ (максимально прямой с минимальными отступами)
+function calculateDirectPath(
+	source: VectorPlusPosition,
+	target: VectorPlusPosition,
+	buffer: number
+): XYPair[] {
+	const steps: XYPair[] = [];
+	const deltaX = target.x - source.x;
+	const deltaY = target.y - source.y;
+
+	// Минимальные отступы
+	const minBuffer = buffer / 2;
+
+	const sourceExit = {
+		x: source.direction.x * minBuffer,
+		y: source.direction.y * minBuffer
+	};
+	steps.push(sourceExit);
+
+	// Прямой путь к цели
+	const directStep = {
+		x: deltaX - sourceExit.x - (target.direction.x * minBuffer),
+		y: deltaY - sourceExit.y - (target.direction.y * minBuffer)
+	};
+
+	if (directStep.x !== 0 || directStep.y !== 0) {
+		steps.push(directStep);
+	}
+
+	// Вход в целевую ноду
+	const targetEntry = {
+		x: target.direction.x * minBuffer,
+		y: target.direction.y * minBuffer
+	};
+	steps.push(targetEntry);
+
+	return steps;
+}
+
+// 🎯 УМНЫЙ АЛГОРИТМ (учитывает направления якорей и препятствия)
+function calculateSmartPath(
+	source: VectorPlusPosition,
+	target: VectorPlusPosition,
+	buffer: number,
+	preferredDirection: 'horizontal' | 'vertical',
+	maxBends: number,
+	avoidOverlap: boolean
+): XYPair[] {
+	const steps: XYPair[] = [];
+	const deltaX = target.x - source.x;
+	const deltaY = target.y - source.y;
+	const absX = Math.abs(deltaX);
+	const absY = Math.abs(deltaY);
+
+	// Определяем направления якорей
+	const sourceIsHorizontal = Math.abs(source.direction.x) > Math.abs(source.direction.y);
+	const targetIsHorizontal = Math.abs(target.direction.x) > Math.abs(target.direction.y);
+
+	// Выход из исходной ноды
+	const sourceExit = {
+		x: source.direction.x * buffer,
+		y: source.direction.y * buffer
+	};
+	steps.push(sourceExit);
+
+	// Умная логика маршрутизации
+	if (sourceIsHorizontal && targetIsHorizontal) {
+		// Оба якоря горизонтальные
+		if (Math.sign(source.direction.x) === Math.sign(target.direction.x)) {
+			// Якоря смотрят в одну сторону
+			const midY = (source.y + target.y) / 2;
+			steps.push({ x: 0, y: midY - source.y - sourceExit.y });
+			steps.push({ x: deltaX - sourceExit.x - (target.direction.x * buffer), y: 0 });
+			steps.push({ x: 0, y: target.y - midY });
+		} else {
+			// Якоря смотрят друг на друга
+			const midX = (source.x + target.x) / 2;
+			steps.push({ x: midX - source.x - sourceExit.x, y: 0 });
+			steps.push({ x: 0, y: deltaY - sourceExit.y - (target.direction.y * buffer) });
+			steps.push({ x: target.x - midX, y: 0 });
+		}
+	} else if (!sourceIsHorizontal && !targetIsHorizontal) {
+		// Оба якоря вертикальные
+		if (Math.sign(source.direction.y) === Math.sign(target.direction.y)) {
+			// Якоря смотрят в одну сторону
+			const midX = (source.x + target.x) / 2;
+			steps.push({ x: midX - source.x - sourceExit.x, y: 0 });
+			steps.push({ x: 0, y: deltaY - sourceExit.y - (target.direction.y * buffer) });
+			steps.push({ x: target.x - midX, y: 0 });
+		} else {
+			// Якоря смотрят друг на друга
+			const midY = (source.y + target.y) / 2;
+			steps.push({ x: 0, y: midY - source.y - sourceExit.y });
+			steps.push({ x: deltaX - sourceExit.x - (target.direction.x * buffer), y: 0 });
+			steps.push({ x: 0, y: target.y - midY });
+		}
+	} else {
+		// Смешанные направления - используем предпочтительное направление
+		if (preferredDirection === 'horizontal') {
+			steps.push({ x: deltaX - sourceExit.x - (target.direction.x * buffer), y: 0 });
+			steps.push({ x: 0, y: deltaY - sourceExit.y - (target.direction.y * buffer) });
+		} else {
+			steps.push({ x: 0, y: deltaY - sourceExit.y - (target.direction.y * buffer) });
+			steps.push({ x: deltaX - sourceExit.x - (target.direction.x * buffer), y: 0 });
+		}
+	}
+
+	// Вход в целевую ноду
+	const targetEntry = {
+		x: target.direction.x * buffer,
+		y: target.direction.y * buffer
+	};
+	steps.push(targetEntry);
+
+	return steps;
+}
+
+// 🎯 ОРИГИНАЛЬНАЯ ФУНКЦИЯ (сохраняем для обратной совместимости)
 // This can absolutley be optimized
 export function calculateStepPath(
 	source: VectorPlusPosition,

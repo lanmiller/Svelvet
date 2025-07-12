@@ -11,7 +11,7 @@ import type {
 } from '.';
 import type { PixelValue, RemValue } from '.';
 import type { ComponentType } from 'svelte';
-export type EdgeStyle = 'straight' | 'step' | 'bezier';
+export type EdgeStyle = 'straight' | 'step' | 'bezier' | 'orthogonal' | 'smart-step' | 'minimal-step' | 'direct-step';
 export type EndStyle = 'arrow' | null;
 
 // With writable properties
@@ -21,9 +21,9 @@ export type WritableEdge = {
 	target: Anchor | CursorAnchor;
 	type: Writable<EdgeStyle | null>;
 	color:
-		| Writable<CSSColorString | null>
-		| CustomWritable<CSSColorString>
-		| Readable<CSSColorString>;
+	| Writable<CSSColorString | null>
+	| CustomWritable<CSSColorString>
+	| Readable<CSSColorString>;
 	width: Writable<number>;
 	label?: EdgeLabel;
 	animated: Writable<boolean>;
@@ -80,9 +80,9 @@ export interface EdgeLabel {
 export interface EdgeConfig {
 	type?: EdgeStyle;
 	color?:
-		| Writable<CSSColorString | null>
-		| CustomWritable<CSSColorString>
-		| Readable<CSSColorString>;
+	| Writable<CSSColorString | null>
+	| CustomWritable<CSSColorString>
+	| Readable<CSSColorString>;
 	width?: number;
 	label?: EdgeLabelConfig;
 	animated?: boolean;
