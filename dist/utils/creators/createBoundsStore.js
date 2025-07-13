@@ -40,7 +40,7 @@ export function createBoundsStore(nodes, dimensions, scale, translation) {
         let newRight = -Infinity;
         let newBottom = -Infinity;
         for (const node of nodes.getAll()) {
-            console.log('dentro del for, este es e node:', node);
+            // console.log('dentro del for, este es e node:', node);
             //ESTAS PROPIEDADES DEBEN CONSERVARSE DE TIPO STORE PORQUE OTROS COMPONENTES DEPENDEN DE ESTAS PROPIEDAES
             const { x, y } = get(node.position);
             const width = get(node.dimensions.width);
@@ -60,7 +60,7 @@ export function createBoundsStore(nodes, dimensions, scale, translation) {
     }
     //AQUI nodes ES EL ARGUMENTO QUE RECIBE LA FUNCION PADRE, SE ESPERA UN STORE DE NODES PERO NO ESTA LLEGANDO NADA
     nodes.subscribe(() => {
-        console.log('dentro del nodes.subscribe...........Aqui no estan llegando los nodes');
+        // console.log('dentro del nodes.subscribe...........Aqui no estan llegando los nodes');
         recalculateNodeBounds();
     });
     resizing.subscribe((resizing) => {

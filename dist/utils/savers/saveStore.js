@@ -48,7 +48,7 @@ function domRectReplacer(_key, value) {
 // Updated by Team v.11.0
 // Function to get JSON stringified data from nested Svelte store
 export function getJSONState(store) {
-    console.log('graph state object:', store);
+    // console.log('graph state object:', store);
     // // eslint-disable-next-line no-console
     // console.log('nodes object before traverse: ', store.nodes.getAll());
     const data = traverse(store);

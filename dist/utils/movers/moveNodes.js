@@ -25,17 +25,17 @@ function createGroupBox(graph, groupName) {
     };
     // Add to graph.groupBoxes before moving nodes
     graph.groupBoxes.set(groupName, groupBox);
-    console.log(`Group box for ${groupName} created!`);
-    console.log('Current group boxes:', get(graph.groupBoxes));
+    // console.log(`Group box for ${groupName} created!`);
+    // console.log('Current group boxes:', get(graph.groupBoxes));
 }
 export function moveNodes(graph, snapTo) {
-    console.log('moveNodes called'); // Debugging line
+    // console.log('moveNodes called'); // Debugging line
     let animationFrame;
     const groups = get(graph.groups);
     const groupName = get(graph.activeGroup);
     //log state of stores
-    console.log('Graph Groups:', groups);
-    console.log('Active Group:', groupName);
+    // console.log('Graph Groups:', groups);
+    // console.log('Active Group:', groupName);
     // Ensure that group boxes are created only if missing
     // if (groupName && !graph.groupBoxes.has(groupName)) {
     // 	createGroupBox(graph, groupName);
@@ -50,7 +50,7 @@ export function moveNodes(graph, snapTo) {
     const nodeGroupArray = Array.from(get(nodeGroup));
     const groupBoxes = get(graph.groupBoxes);
     //log groupBoxes
-    console.log('Group Boxes:', groupBoxes);
+    // console.log('Group Boxes:', groupBoxes);
     nodeGroupArray.forEach((node) => node.moving.set(true));
     moveGroup();
     function moveGroup() {
@@ -108,7 +108,7 @@ export function moveElementWithBounds(initialPosition, delta, position, bounds) 
 }
 export function calculateRelativeBounds(groupBox, nodeWidth, nodeHeight) {
     const { x: groupBoxX, y: groupBoxY } = get(groupBox.position);
-    console.log('Group Box Position:', { x: groupBoxX, y: groupBoxY });
+    // console.log('Group Box Position:', { x: groupBoxX, y: groupBoxY });
     return {
         left: groupBoxX + buffer,
         right: groupBoxX + get(groupBox.dimensions.width) - nodeWidth - buffer,

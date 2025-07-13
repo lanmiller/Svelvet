@@ -2,13 +2,14 @@
 	import { Svelvet, Node, Anchor, Controls, Minimap, Background } from '$lib';
 	import ThemeToggle from '$lib/components/ThemeToggle/ThemeToggle.svelte';
 	import { onMount, getContext } from 'svelte';
+	import type { EdgeStyle } from '$lib/types'; // Добавляем импорт типа
 
 	// Состояние для контроля соединений
 	let showConnections = false;
-	let edgeAlgorithm = 'orthogonal'; // 'orthogonal', 'smart-step', 'minimal-step', 'direct-step'
+	let edgeAlgorithm: EdgeStyle = 'orthogonal'; // ✅ Исправлено: добавлен тип
 
 	// Состояние для управления соединениями
-	let selectedEdge = null; // Выбранное соединение для удаления
+	let selectedEdge: string | null = null; // ✅ Исправлено: добавлен тип
 	let connectionStats = { total: 0, selected: null };
 
 	// Функции управления
@@ -18,7 +19,8 @@
 		updateConnectionStats();
 	}
 
-	function setEdgeAlgorithm(algorithm: string) {
+	function setEdgeAlgorithm(algorithm: EdgeStyle) {
+		// ✅ Исправлено: добавлен тип
 		edgeAlgorithm = algorithm;
 	}
 
@@ -65,11 +67,13 @@
 	// Сброс выделения соединений происходит автоматически через Svelvet
 
 	// Обработчики событий соединений
-	function handleConnection(event) {
+	function handleConnection(event: CustomEvent) {
+		// ✅ Исправлено: добавлен тип
 		console.log('🔗 Создано соединение:', event.detail);
 	}
 
-	function handleDisconnection(event) {
+	function handleDisconnection(event: CustomEvent) {
+		// ✅ Исправлено: добавлен тип
 		console.log('❌ Удалено соединение:', event.detail);
 		// Если удаленное соединение было выбрано, сбрасываем выбор
 		if (selectedEdge && event.detail.edgeId === selectedEdge) {
@@ -378,7 +382,8 @@
 		</div>
 	</div>
 
-	<ThemeToggle main="dark" alt="light" slot="toggle" />
+	<!-- ✅ Исправлено: убрали slot для ThemeToggle -->
+	<ThemeToggle main="dark" alt="light" />
 </body>
 
 <style>
