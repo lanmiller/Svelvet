@@ -13,6 +13,10 @@ declare const __propDef: {
         input?: boolean | undefined;
         output?: boolean | undefined;
         /**
+             * @default 'false'
+             * @description When `true`, the provided id will be used as-is without A- prefix and /nodeId suffix
+             */ useRawId?: boolean | undefined;
+        /**
              * @default dependent on `input` and `output` props
              * @description When `true`, the Anchor will accept multiple connections. This is set to true by default
              * for output anchors or anchors that have not specified an input/output prop.

@@ -64,6 +64,11 @@
 	export let input = false;
 	export let output = false;
 	/**
+	 * @default 'false'
+	 * @description When `true`, the provided id will be used as-is without A- prefix and /nodeId suffix
+	 */
+	export let useRawId = false;
+	/**
 	 * @default dependent on `input` and `output` props
 	 * @description When `true`, the Anchor will accept multiple connections. This is set to true by default
 	 * for output anchors or anchors that have not specified an input/output prop.
@@ -129,7 +134,7 @@
 	$: connecting = $connectingFrom?.anchor === anchor;
 	$: connectedAnchors = anchor && anchor.connected;
 
-	const anchorKey: AnchorKey = `A-${id || anchors.count() + 1}/${node.id}`;
+	const anchorKey: AnchorKey = useRawId ? String(id) : `A-${id || anchors.count() + 1}/${node.id}`;
 	const anchor = createAnchor(
 		graph,
 		node,

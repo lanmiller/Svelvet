@@ -39,6 +39,7 @@ export let bgColor = null;
 export let id = 0;
 export let input = false;
 export let output = false;
+export let useRawId = false;
 export let multiple = output ? true : input ? false : true;
 export let dynamic = nodeDynamic || false;
 export let edge = null;
@@ -73,7 +74,7 @@ $:
   connecting = $connectingFrom?.anchor === anchor;
 $:
   connectedAnchors = anchor && anchor.connected;
-const anchorKey = `A-${id || anchors.count() + 1}/${node.id}`;
+const anchorKey = useRawId ? String(id) : `A-${id || anchors.count() + 1}/${node.id}`;
 const anchor = createAnchor(
   graph,
   node,
