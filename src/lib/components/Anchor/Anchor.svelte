@@ -594,10 +594,16 @@
 				return a;
 			}, null);
 		} else {
-			// Create anchor key
-			const anchorKey: AnchorKey = `A-${anchorId}/${nodekey}`;
-			// Look up anchor in store
-			anchorToConnect = nodeToConnect.anchors.get(anchorKey) || null;
+			// ✅ ИСПРАВЛЕНО: Поддержка useRawId=true
+			// Сначала пробуем найти якорь с простым ID (useRawId=true)
+			const rawAnchorKey: AnchorKey = `${nodeId}-${anchorId}`;
+			anchorToConnect = nodeToConnect.anchors.get(rawAnchorKey) || null;
+
+			// Если не найден, пробуем старый формат
+			if (!anchorToConnect) {
+				const anchorKey: AnchorKey = `A-${anchorId}/${nodekey}`;
+				anchorToConnect = nodeToConnect.anchors.get(anchorKey) || null;
+			}
 		}
 
 		if (!anchorToConnect) {

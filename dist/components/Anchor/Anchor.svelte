@@ -447,8 +447,12 @@ const processConnection = (connection) => {
       return a;
     }, null);
   } else {
-    const anchorKey2 = `A-${anchorId}/${nodekey}`;
-    anchorToConnect = nodeToConnect.anchors.get(anchorKey2) || null;
+    const rawAnchorKey = `${nodeId}-${anchorId}`;
+    anchorToConnect = nodeToConnect.anchors.get(rawAnchorKey) || null;
+    if (!anchorToConnect) {
+      const anchorKey2 = `A-${anchorId}/${nodekey}`;
+      anchorToConnect = nodeToConnect.anchors.get(anchorKey2) || null;
+    }
   }
   if (!anchorToConnect) {
     return false;
