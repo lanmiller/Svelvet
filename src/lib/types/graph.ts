@@ -38,6 +38,7 @@ export interface Graph {
 	editing: Writable<Node | null>;
 	activeGroup: Writable<GroupKey | null>;
 	initialNodePositions: Writable<XYPair[]>;
+	getNodeDimensions: (nodeId: string | number) => { width: number; height: number } | null;
 }
 
 // Props for Svelvet component

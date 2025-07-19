@@ -68,10 +68,33 @@
 	// Subscriptions
 	$: actualPosition = $position;
 
+	// Track previous dimensions for change detection
+	let prevWidth = $widthStore;
+	let prevHeight = $heightStore;
+
 	// Reactive declarations
 	$: selected = $selectedNodes.has(node); // Used as class directive
 	$: hidden = $hiddenNodes.has(node); // Used as class directive
 	$: fixedSizing = dimensionsProvided || $resized;
+
+	// Watch for dimension changes
+	$: if ($widthStore !== prevWidth || $heightStore !== prevHeight) {
+		const oldDimensions = { width: prevWidth, height: prevHeight };
+		const newDimensions = { width: $widthStore, height: $heightStore };
+
+		// Only dispatch if both values are not zero (initial state)
+		if (prevWidth !== 0 || prevHeight !== 0) {
+			dispatch('nodeDimensionsChanged', {
+				node,
+				nodeId: node.id.slice(2), // Remove 'N-' prefix
+				oldDimensions,
+				newDimensions
+			});
+		}
+
+		prevWidth = $widthStore;
+		prevHeight = $heightStore;
+	}
 
 	// If the node is selected and the duplicate key pair is pressed
 	// Dispatch the duplicate event

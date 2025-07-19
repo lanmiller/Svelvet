@@ -284,6 +284,7 @@
 		on:nodeMount
 		on:nodeReleased
 		on:duplicate
+		on:nodeDimensionsChanged
 		let:destroy
 		let:selected
 		let:grabHandle
