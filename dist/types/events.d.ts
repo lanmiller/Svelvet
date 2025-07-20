@@ -11,3 +11,15 @@ export interface AnchorConnectionEvent {
     connectedNode: Node;
     connectedAnchor: Anchor;
 }
+export interface NodeDimensionsChangedEvent {
+    node: Node;
+    nodeId: string | number;
+    oldDimensions: {
+        width: number;
+        height: number;
+    };
+    newDimensions: {
+        width: number;
+        height: number;
+    };
+}

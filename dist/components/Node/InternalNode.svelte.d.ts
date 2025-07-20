@@ -6,16 +6,16 @@ declare const __propDef: {
         isDefault: boolean;
         useDefaults: boolean;
         center: boolean;
-        nodeStore: Graph['nodes'];
-        locked: Graph['locked'];
-        groups: Graph['groups'];
-        maxZIndex: Graph['maxZIndex'];
-        centerPoint: Graph['center'];
-        cursor: Graph['cursor'];
-        initialNodePositions: Graph['initialNodePositions'];
-        activeGroup: Graph['activeGroup'];
-        editing: Graph['editing'];
-        dimensionsProvided?: boolean | undefined;
+        nodeStore: Graph["nodes"];
+        locked: Graph["locked"];
+        groups: Graph["groups"];
+        maxZIndex: Graph["maxZIndex"];
+        centerPoint: Graph["center"];
+        cursor: Graph["cursor"];
+        initialNodePositions: Graph["initialNodePositions"];
+        activeGroup: Graph["activeGroup"];
+        editing: Graph["editing"];
+        dimensionsProvided?: boolean;
         title: string;
     };
     events: {

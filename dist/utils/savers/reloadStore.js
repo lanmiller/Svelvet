@@ -64,7 +64,7 @@ export function reloadStore(store) {
     const object = JSON.parse(store);
     // console.log('RECONSTRUCTED GRAPH:', object);
     const graph = createGraph(object.id, {
-        ...object,
+        ...object, // 🔥 Esto asegurará que pasamos TODAS las propiedades del objeto
         editable: object.editable,
         direction: object.direction,
         locked: object.locked,

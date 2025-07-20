@@ -55,8 +55,9 @@ export function createBoundsStore(nodes, dimensions, scale, translation) {
         }
         nodeBounds.set({ top: newTop, left: newLeft, right: newRight, bottom: newBottom });
         recalculateBounds();
-        if (tracking)
+        if (tracking && typeof requestAnimationFrame !== 'undefined') {
             animationFrame = requestAnimationFrame(() => recalculateNodeBounds(tracking));
+        }
     }
     //AQUI nodes ES EL ARGUMENTO QUE RECIBE LA FUNCION PADRE, SE ESPERA UN STORE DE NODES PERO NO ESTA LLEGANDO NADA
     nodes.subscribe(() => {
@@ -66,13 +67,13 @@ export function createBoundsStore(nodes, dimensions, scale, translation) {
     resizing.subscribe((resizing) => {
         if (resizing)
             recalculateNodeBounds(resizing);
-        if (!resizing)
+        if (!resizing && typeof cancelAnimationFrame !== 'undefined')
             cancelAnimationFrame(animationFrame);
     });
     tracking.subscribe((tracking) => {
         if (tracking)
             recalculateNodeBounds(tracking);
-        if (!tracking)
+        if (!tracking && typeof cancelAnimationFrame !== 'undefined')
             cancelAnimationFrame(animationFrame);
     });
     dimensions.subscribe(() => {

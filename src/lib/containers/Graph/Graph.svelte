@@ -93,13 +93,15 @@
 	let controlsComponent: ComponentType | null = null;
 	let drawerComponent: ComponentType | null = null;
 	let contrastComponent: ComponentType | null = null;
+	let spacePressed = false; // For Figma-like space panning
 
 	// Subscriptions
 	// This line is a Svelte reactive statement, denoted by $:. It creates a reactivity relationship between dimensions and dimensionsStore.
 	$: dimensions = $dimensionsStore;
 
 	// Update the svelvet-theme attribute everytime the theme changes
-	$: if (theme) document.documentElement.setAttribute('svelvet-theme', theme);
+	$: if (theme && typeof document !== 'undefined')
+		document.documentElement.setAttribute('svelvet-theme', theme);
 	// camera view adjustment
 	$: if (!initialFit && fitView) {
 		fitIntoView();
@@ -161,6 +163,16 @@
 	onMount(() => {
 		console.log('Graph component mounted with drawer1:', drawer); // Add this line
 		updateGraphDimensions();
+
+		// Reset space key on window blur
+		const handleWindowBlur = () => {
+			spacePressed = false;
+		};
+		window.addEventListener('blur', handleWindowBlur);
+
+		return () => {
+			window.removeEventListener('blur', handleWindowBlur);
+		};
 	});
 
 	async function fitIntoView() {
@@ -299,13 +311,20 @@
 	}
 
 	function onMouseDown(e: MouseEvent) {
-		if (!pannable && !(e.shiftKey || e.metaKey)) return;
+		// Allow panning if space is pressed (Figma-like behavior)
+		if (!pannable && !spacePressed && !(e.shiftKey || e.metaKey)) return;
 		if (e.button === 2) return;
 		if ($graphDOMElement) $graphDOMElement.focus();
 
 		const { clientX, clientY } = e;
 
 		$initialClickPosition = get(cursor);
+
+		// If space is pressed, enable panning mode
+		if (spacePressed) {
+			isMovable = true;
+			return;
+		}
 
 		if (e.shiftKey || e.metaKey) {
 			e.preventDefault();
@@ -377,6 +396,13 @@
 
 		// We dont want to prevent users from interacting with inputs
 		if (target.tagName == 'INPUT' || target.tagName == 'TEXTAREA') return;
+
+		// Handle space for panning (Figma-like behavior)
+		if (key === ' ' || code === 'Space') {
+			e.preventDefault(); // Prevent page scroll
+			spacePressed = true;
+			return;
+		}
 
 		if (code === 'KeyA' && e[`${modifier}Key`]) {
 			const unlockedNodes = graph.nodes.getAll().filter((node) => !get(node.locked));
@@ -492,7 +518,13 @@
 	}
 
 	function handleKeyUp(e: KeyboardEvent) {
-		const { key } = e;
+		const { key, code } = e;
+
+		// Handle space release
+		if (key === ' ' || code === 'Space') {
+			spacePressed = false;
+			return;
+		}
 
 		if (isArrow(key)) {
 			clearInterval(activeIntervals[key]);
@@ -511,16 +543,21 @@
 
 		// Check if deltaY has decimal places
 		// If it does, it means the user is using a trackpad
-		// If trackpadPan is enabled or the meta key is pressed
-		// Pan the graph instead of zooming
-		if ((trackpadPan || e.metaKey) && deltaY % 1 === 0) {
+		// Check if we should pan instead of zoom
+		const modifierPressed = e[`${modifier}Key`];
+		
+		// Pan if: trackpadPan is true AND modifier is NOT pressed
+		// OR if: trackpadPan is false AND modifier IS pressed
+		if (trackpadPan && !modifierPressed) {
 			$translation = {
 				x: ($translation.x -= e.deltaX),
 				y: ($translation.y -= e.deltaY)
 			};
-
 			return;
 		}
+		
+		// If trackpadPan is false and modifier is not pressed, we zoom (default behavior)
+		// If trackpadPan is true and modifier is pressed, we also zoom
 
 		if (($scale >= MAX_SCALE && deltaY < 0) || ($scale <= MIN_SCALE && deltaY > 0)) return;
 
@@ -635,7 +672,7 @@
 	{title}
 	style:width={width ? width + 'px' : '100%'}
 	style:height={height ? height + 'px' : '100%'}
-	style:cursor={pannable ? 'move' : 'default'}
+	style:cursor={spacePressed ? 'grab' : (isMovable ? 'grabbing' : (pannable ? 'move' : 'default'))}
 	on:wheel|preventDefault={handleScroll}
 	on:mousedown|preventDefault|self={onMouseDown}
 	on:touchend|preventDefault={onTouchEnd}

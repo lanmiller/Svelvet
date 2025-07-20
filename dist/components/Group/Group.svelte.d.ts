@@ -5,7 +5,7 @@ declare const __propDef: {
         width: number;
         height: number;
         position: XYPair;
-        color?: CSSColorString | undefined;
+        color?: CSSColorString;
         groupName: string | number;
     };
     events: {

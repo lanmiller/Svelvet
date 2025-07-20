@@ -3,11 +3,11 @@ import type { CSSColorString, Node } from '../../types';
 declare const __propDef: {
     props: {
         node: Node;
-        hidden?: boolean | undefined;
+        hidden?: boolean;
         toggleHidden: (node: Node) => void;
         top: number;
         left: number;
-        nodeColor?: CSSColorString | null | undefined;
+        nodeColor?: CSSColorString | null;
         hideable: boolean;
     };
     events: {

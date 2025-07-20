@@ -1,115 +1,45 @@
 <script>
 	import { Svelvet, Node } from '$lib';
-	import { getContext } from 'svelte';
+	import { onMount } from 'svelte';
 
-	let svelvetInstance;
+	let graph;
 	/** @type {Record<string, {width: number, height: number}>} */
 	let nodeDimensions = {};
-
-	// Компонент с динамическим контентом
-	function DynamicContentNode({ id }) {
-		const graph = getContext('graph');
-		let contentLines = 3;
-
-		function addContent() {
-			contentLines += 1;
-		}
-
-		function removeContent() {
-			if (contentLines > 1) {
-				contentLines -= 1;
-			}
-		}
-
-		function cloneNode() {
-			// Получаем актуальные размеры через API
-			const dimensions = graph.getNodeDimensions(id);
-			console.log(`Клонирование ноды ${id} с размерами:`, dimensions);
-
-			// Здесь можно добавить логику клонирования
-			alert(`Нода ${id} имеет размеры: ${dimensions?.width}x${dimensions?.height}`);
-		}
-
-		return {
-			c() {
-				const container = document.createElement('div');
-				container.style.padding = '20px';
-				container.style.minWidth = '300px';
-				container.innerHTML = `
-                    <h3>Нода ${id}</h3>
-                    <div id="content-${id}">
-                        ${Array(contentLines)
-													.fill(0)
-													.map((_, i) => `<p>Строка контента ${i + 1}</p>`)
-													.join('')}
-                    </div>
-                    <div style="margin-top: 10px;">
-                        <button id="add-${id}">Добавить контент</button>
-                        <button id="remove-${id}">Удалить контент</button>
-                        <button id="clone-${id}">Клонировать</button>
-                    </div>
-                    <div id="dimensions-${id}" style="margin-top: 10px; font-size: 12px; color: #666;">
-                        Размеры: обновляются...
-                    </div>
-                `;
-
-				return container;
-			},
-			m(target, anchor) {
-				target.insertBefore(this.container, anchor);
-
-				// Обработчики событий
-				document.getElementById(`add-${id}`).addEventListener('click', () => {
-					addContent();
-					this.updateContent();
-				});
-
-				document.getElementById(`remove-${id}`).addEventListener('click', () => {
-					removeContent();
-					this.updateContent();
-				});
-
-				document.getElementById(`clone-${id}`).addEventListener('click', cloneNode);
-			},
-			updateContent() {
-				const contentDiv = document.getElementById(`content-${id}`);
-				if (contentDiv) {
-					contentDiv.innerHTML = Array(contentLines)
-						.fill(0)
-						.map((_, i) => `<p>Строка контента ${i + 1}</p>`)
-						.join('');
-				}
-			},
-			updateDimensions(width, height) {
-				const dimensionsDiv = document.getElementById(`dimensions-${id}`);
-				if (dimensionsDiv) {
-					dimensionsDiv.textContent = `Размеры: ${Math.round(width)}x${Math.round(height)}px`;
-				}
-			},
-			container: null
-		};
-	}
 
 	function handleNodeDimensionsChanged(event) {
 		const { nodeId, newDimensions } = event.detail;
 		if (!nodeId || !newDimensions) return;
 		nodeDimensions[nodeId] = newDimensions;
 		console.log(`📏 Размеры ноды ${nodeId} изменились:`, newDimensions);
-
-		// Обновляем отображение размеров в ноде
-		const nodeComponent = document.querySelector(`[id="${nodeId}"] .custom-node-content`);
-		if (nodeComponent && nodeComponent._component) {
-			nodeComponent._component.updateDimensions(newDimensions.width, newDimensions.height);
-		}
 	}
 
 	function getNodeDimensions(nodeId) {
-		if (svelvetInstance?.graph) {
-			const dimensions = svelvetInstance.graph.getNodeDimensions(nodeId);
+		if (graph) {
+			const dimensions = graph.getNodeDimensions(nodeId);
 			console.log(`📐 Получены размеры ноды ${nodeId}:`, dimensions);
+			alert(`Нода ${nodeId} имеет размеры: ${dimensions?.width}x${dimensions?.height}`);
 			return dimensions;
 		}
 		return null;
+	}
+
+	// Контент нод обновляется динамически
+	let node1Lines = ['Строка контента 1', 'Строка контента 2', 'Строка контента 3'];
+	let node3Lines = [
+		'Эта нода содержит много текста для демонстрации автоматического определения высоты.',
+		'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+		'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+		'Ut enim ad minim veniam, quis nostrud exercitation.'
+	];
+
+	function addContentNode1() {
+		node1Lines = [...node1Lines, `Новая строка ${node1Lines.length + 1}`];
+	}
+
+	function removeContentNode1() {
+		if (node1Lines.length > 1) {
+			node1Lines = node1Lines.slice(0, -1);
+		}
 	}
 </script>
 
@@ -129,13 +59,13 @@
 		<ol>
 			<li>Нажмите "Добавить контент" чтобы увеличить высоту ноды</li>
 			<li>Нажмите "Удалить контент" чтобы уменьшить высоту</li>
-			<li>Нажмите "Клонировать" чтобы получить актуальные размеры через API</li>
+			<li>Нажмите "Получить размеры" чтобы получить актуальные размеры через API</li>
 			<li>Смотрите консоль для логов событий</li>
 		</ol>
 	</div>
 
 	<div class="canvas-container">
-		<Svelvet bind:this={svelvetInstance}>
+		<Svelvet bind:graph>
 			<Node
 				id="node1"
 				position={{ x: 100, y: 100 }}
@@ -143,27 +73,12 @@
 			>
 				<div class="custom-node-content">
 					<h3>Нода 1</h3>
-					{#each Array(3) as _, i}
-						<p>Строка контента {i + 1}</p>
+					{#each node1Lines as line}
+						<p>{line}</p>
 					{/each}
 					<div class="buttons">
-						<button
-							on:click={() => {
-								const content = document.querySelector('[id="node1"] .custom-node-content');
-								const p = document.createElement('p');
-								p.textContent = `Новая строка ${content.children.length}`;
-								content.insertBefore(p, content.querySelector('.buttons'));
-							}}>Добавить контент</button
-						>
-						<button
-							on:click={() => {
-								const content = document.querySelector('[id="node1"] .custom-node-content');
-								const paragraphs = content.querySelectorAll('p');
-								if (paragraphs.length > 1) {
-									paragraphs[paragraphs.length - 1].remove();
-								}
-							}}>Удалить контент</button
-						>
+						<button on:click={addContentNode1}>Добавить контент</button>
+						<button on:click={removeContentNode1}>Удалить контент</button>
 						<button on:click={() => getNodeDimensions('node1')}>Получить размеры</button>
 					</div>
 					<div class="dimensions-display">
@@ -204,10 +119,9 @@
 			>
 				<div class="custom-node-content">
 					<h3>Нода 3 с длинным контентом</h3>
-					<p>Эта нода содержит много текста для демонстрации автоматического определения высоты.</p>
-					<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-					<p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-					<p>Ut enim ad minim veniam, quis nostrud exercitation.</p>
+					{#each node3Lines as line}
+						<p>{line}</p>
+					{/each}
 					<div class="buttons">
 						<button on:click={() => getNodeDimensions('node3')}>Получить размеры</button>
 					</div>

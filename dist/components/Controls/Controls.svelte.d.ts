@@ -2,11 +2,11 @@ import { SvelteComponentTyped } from "svelte";
 import type { CSSColorString } from '../../types';
 declare const __propDef: {
     props: {
-        increment?: number | undefined;
-        horizontal?: boolean | undefined;
-        bgColor?: CSSColorString | null | undefined;
-        iconColor?: CSSColorString | null | undefined;
-        corner?: string | undefined;
+        increment?: number;
+        horizontal?: boolean;
+        bgColor?: CSSColorString | null;
+        iconColor?: CSSColorString | null;
+        corner?: string;
     };
     events: {
         [evt: string]: CustomEvent<any>;

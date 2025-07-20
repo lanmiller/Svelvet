@@ -123,7 +123,7 @@
 	const selectedEdgeStore = writable<string | null>(null);
 
 	// let graph: GraphType;
-	let graph: GraphType | null = null;
+	export let graph: GraphType | null = null;
 	let direction: 'TD' | 'LR' = TD ? 'TD' : 'LR';
 
 	// ✅ ИСПРАВЛЕНИЕ: Создаем граф сразу при инициализации компонента
@@ -144,50 +144,35 @@
 
 	// 🎯 НОВОЕ: Обработчик клавиш для удаления соединений
 	function handleKeyDown(event: KeyboardEvent) {
-		console.log(`🎹 Нажата клавиша: ${event.key}`);
-
 		// Удаляем выделенное соединение по клавише Delete или Backspace
 		if ((event.key === 'Delete' || event.key === 'Backspace') && graph) {
 			const selectedEdgeId = $selectedEdgeStore;
-			console.log(`🎯 Выделенное соединение: ${selectedEdgeId}`);
 
 			if (selectedEdgeId) {
 				try {
-					console.log(`🗑️ Удаляем соединение: ${selectedEdgeId}`);
 
 					// Получаем все соединения и ищем нужное по ID
 					const allEdges = edgeStore.getAll();
-					console.log(`🔍 Всего соединений в store:`, allEdges.length);
 
 					// Ищем соединение по ID
 					const targetEdge = allEdges.find((edge) => edge.id === selectedEdgeId);
-					console.log(`🔍 Найденное соединение:`, targetEdge);
 
 					if (targetEdge) {
 						// Используем метод match для получения ключа соединения
 						const edgeKeys = edgeStore.match(targetEdge.source, targetEdge.target);
-						console.log(`🔍 Найденные ключи соединения:`, edgeKeys);
 
 						if (edgeKeys.length > 0) {
 							// Удаляем соединение по найденному ключу
 							const deleted = edgeStore.delete(edgeKeys[0]);
-							console.log(`🗑️ Результат удаления:`, deleted);
 
 							if (deleted) {
 								// Сбрасываем выделение
 								selectedEdgeStore.set(null);
-								console.log(`✅ Соединение ${selectedEdgeId} удалено успешно`);
-							} else {
-								console.warn(`❌ Не удалось удалить соединение ${selectedEdgeId}`);
 							}
-						} else {
-							console.warn(`❌ Не найдены ключи для соединения ${selectedEdgeId}`);
 						}
-					} else {
-						console.warn(`❌ Соединение ${selectedEdgeId} не найдено в store`);
 					}
 				} catch (error) {
-					console.error(`❌ Ошибка при удалении соединения:`, error);
+					// Ошибка при удалении соединения
 				}
 			}
 		}

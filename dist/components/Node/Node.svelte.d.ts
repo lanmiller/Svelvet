@@ -12,45 +12,45 @@ declare const __propDef: {
              */ position?: {
             x: number;
             y: number;
-        } | undefined;
-        drop?: false | "cursor" | "center" | undefined;
+        };
+        drop?: "cursor" | "center" | false;
         /**
              * @type { width: number, height: number}
              * @description Used to set the initial dimensions of the Node. Primarily used for default Nodes,
              * but can be used with custom Nodes as well. This value does not currently feature two way binding
-             */ dimensions?: InitialDimensions | null | undefined;
+             */ dimensions?: InitialDimensions | null;
         /**
              * @default current node count
              * @type string | number
              * @description The id of the Node. This value does not currently feature two way binding
-             */ id?: string | number | undefined;
-        bgColor?: CSSColorString | null | undefined;
-        borderRadius?: number | null | undefined;
-        borderColor?: CSSColorString | null | undefined;
-        borderWidth?: number | null | undefined;
-        selectionColor?: CSSColorString | null | undefined;
-        textColor?: CSSColorString | null | undefined;
-        resizable?: boolean | undefined;
-        label?: string | undefined;
+             */ id?: string | number;
+        bgColor?: CSSColorString | null;
+        borderRadius?: number | null;
+        borderColor?: CSSColorString | null;
+        borderWidth?: number | null;
+        selectionColor?: CSSColorString | null;
+        textColor?: CSSColorString | null;
+        resizable?: boolean;
+        label?: string;
         /**
              * @default 1
              * @type number
              * @description The number of input anchors on a default Nodes. This value features two way binding,
-             */ inputs?: number | undefined;
+             */ inputs?: number;
         /**
              * @default 1
              * @type number
              * @description The number of output anchors on a default Node. This value features two way binding,
-             */ outputs?: number | undefined;
-        width?: number | null | undefined;
-        height?: number | null | undefined;
-        TD?: boolean | undefined;
-        LR?: boolean | undefined;
-        zIndex?: number | undefined;
-        editable?: boolean | undefined;
-        locked?: boolean | undefined;
-        rotation?: number | undefined;
-        edge?: ComponentType | null | undefined;
+             */ outputs?: number;
+        width?: number | null;
+        height?: number | null;
+        TD?: boolean;
+        LR?: boolean;
+        zIndex?: number;
+        editable?: boolean;
+        locked?: boolean;
+        rotation?: number;
+        edge?: ComponentType | null;
         /**
              * @default []
              * @type Array<string | number | [string | number, string | number]>
@@ -58,30 +58,31 @@ declare const __propDef: {
              * connections are either Node IDs, which can be strings or numbers, or a tuple of a Node ID and an Anchor ID. This does
              * not feature two way data binding. Please use the let:connect and let:disconnect methods
              * on the Node component to imperatively add and remove connections.
-             */ connections?: Connections | undefined;
+             */ connections?: Connections;
         /**
              * @default false
              * @type boolean
              * @description When true, the a custom Node will use the default styling provided by Svelvet.
-             */ useDefaults?: boolean | undefined;
+             */ useDefaults?: boolean;
         /**
              * @default false
              * @type boolean
              * @description When true, the Node is placed in the center of the viewport on mount.
-             */ center?: boolean | undefined;
+             */ center?: boolean;
         /**
              * @default false
              * @type boolean
              * @description This prop can be set to true to make the Anchors dynamically realign themselves
              * based on the relative position of the source and target nodes.
-             */ dynamic?: boolean | undefined;
-        title?: string | undefined;
+             */ dynamic?: boolean;
+        title?: string;
     };
     events: {
         nodeClicked: CustomEvent<any>;
         nodeMount: CustomEvent<any>;
         nodeReleased: CustomEvent<any>;
         duplicate: CustomEvent<any>;
+        nodeDimensionsChanged: CustomEvent<any>;
         connection: CustomEvent<any>;
         disconnection: CustomEvent<any>;
     } & {

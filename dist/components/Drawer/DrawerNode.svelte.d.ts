@@ -3,7 +3,7 @@ import type { NodeDrawerConfig, AnchorDrawerConfig, EdgeDrawerConfig } from '../
 export declare const defaultNodePropsStore: import("svelte/store").Writable<NodeDrawerConfig[]>;
 export declare const createNodeProps: (edgeProps?: EdgeDrawerConfig, anchorProps?: {
     [key: string]: AnchorDrawerConfig[];
-} | undefined) => any;
+}) => any;
 declare const __propDef: {
     props: Record<string, never>;
     events: {

@@ -1,4 +1,3 @@
-/// <reference types="svelte" />
 import type { Writable } from 'svelte/store';
 import type { WrappedWritable } from '../../types';
 import type { CSSColorString } from '../../types';

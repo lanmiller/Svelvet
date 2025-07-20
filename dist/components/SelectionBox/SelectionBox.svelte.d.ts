@@ -9,9 +9,9 @@ declare const __propDef: {
             top: number;
             left: number;
         };
-        adding?: boolean | undefined;
-        creating?: boolean | undefined;
-        color?: CSSColorString | null | undefined;
+        adding?: boolean;
+        creating?: boolean;
+        color?: CSSColorString | null;
     };
     events: {
         [evt: string]: CustomEvent<any>;

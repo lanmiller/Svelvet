@@ -70,10 +70,11 @@ let minimapComponent = null;
 let controlsComponent = null;
 let drawerComponent = null;
 let contrastComponent = null;
+let spacePressed = false;
 $:
   dimensions = $dimensionsStore;
 $:
-  if (theme)
+  if (theme && typeof document !== "undefined")
     document.documentElement.setAttribute("svelvet-theme", theme);
 $:
   if (!initialFit && fitView) {
@@ -133,6 +134,13 @@ setContext("mounted", mounted);
 onMount(() => {
   console.log("Graph component mounted with drawer1:", drawer);
   updateGraphDimensions();
+  const handleWindowBlur = () => {
+    spacePressed = false;
+  };
+  window.addEventListener("blur", handleWindowBlur);
+  return () => {
+    window.removeEventListener("blur", handleWindowBlur);
+  };
 });
 async function fitIntoView() {
   await tick();
@@ -250,7 +258,7 @@ function onMouseUp(e) {
   anchor.x = 0;
 }
 function onMouseDown(e) {
-  if (!pannable && !(e.shiftKey || e.metaKey))
+  if (!pannable && !spacePressed && !(e.shiftKey || e.metaKey))
     return;
   if (e.button === 2)
     return;
@@ -258,6 +266,10 @@ function onMouseDown(e) {
     $graphDOMElement.focus();
   const { clientX, clientY } = e;
   $initialClickPosition = get(cursor);
+  if (spacePressed) {
+    isMovable = true;
+    return;
+  }
   if (e.shiftKey || e.metaKey) {
     e.preventDefault();
     selecting = true;
@@ -318,6 +330,11 @@ function handleKeyDown(e) {
   const target = e.target;
   if (target.tagName == "INPUT" || target.tagName == "TEXTAREA")
     return;
+  if (key === " " || code === "Space") {
+    e.preventDefault();
+    spacePressed = true;
+    return;
+  }
   if (code === "KeyA" && e[`${modifier}Key`]) {
     const unlockedNodes = graph.nodes.getAll().filter((node) => !get(node.locked));
     $selected = new Set(unlockedNodes);
@@ -440,7 +457,11 @@ function selectNextNode() {
   $selected.add(nodes[nextIndex]);
 }
 function handleKeyUp(e) {
-  const { key } = e;
+  const { key, code } = e;
+  if (key === " " || code === "Space") {
+    spacePressed = false;
+    return;
+  }
   if (isArrow(key)) {
     clearInterval(activeIntervals[key]);
     delete activeIntervals[key];
@@ -455,7 +476,8 @@ function handleScroll(e) {
   const { clientX, clientY, deltaY } = e;
   const currentTranslation = $translation;
   const pointerPosition = { x: clientX, y: clientY };
-  if ((trackpadPan || e.metaKey) && deltaY % 1 === 0) {
+  const modifierPressed = e[`${modifier}Key`];
+  if (trackpadPan && !modifierPressed) {
     $translation = {
       x: $translation.x -= e.deltaX,
       y: $translation.y -= e.deltaY
@@ -538,7 +560,7 @@ function handleArrowKey(key, e) {
 	{title}
 	style:width={width ? width + 'px' : '100%'}
 	style:height={height ? height + 'px' : '100%'}
-	style:cursor={pannable ? 'move' : 'default'}
+	style:cursor={spacePressed ? 'grab' : (isMovable ? 'grabbing' : (pannable ? 'move' : 'default'))}
 	on:wheel|preventDefault={handleScroll}
 	on:mousedown|preventDefault|self={onMouseDown}
 	on:touchend|preventDefault={onTouchEnd}

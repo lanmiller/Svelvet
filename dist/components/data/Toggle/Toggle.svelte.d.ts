@@ -4,7 +4,7 @@ import type { CSSColorString } from '../../../types';
 declare const __propDef: {
     props: {
         parameterStore: CustomWritable<boolean>;
-        color?: CSSColorString | null | undefined;
+        color?: CSSColorString | null;
     };
     events: {
         [evt: string]: CustomEvent<any>;

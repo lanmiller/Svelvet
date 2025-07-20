@@ -4,32 +4,32 @@ import type { CSSColorString, EndStyle } from '../../types';
 import type { WritableEdge } from '../../types';
 declare const __propDef: {
     props: {
-        edge?: WritableEdge | undefined;
-        straight?: boolean | undefined;
-        step?: boolean | undefined;
-        orthogonal?: boolean | undefined;
-        smartStep?: boolean | undefined;
-        minimalStep?: boolean | undefined;
-        directStep?: boolean | undefined;
-        orthogonalOptions?: OrthogonalEdgeOptions | undefined;
-        start?: EndStyle | undefined;
-        end?: EndStyle | undefined;
-        animate?: boolean | undefined;
-        label?: string | undefined;
-        enableHover?: boolean | undefined;
-        edgeClick?: (() => void) | null | undefined;
+        edge?: WritableEdge;
+        straight?: boolean;
+        step?: boolean;
+        orthogonal?: boolean;
+        smartStep?: boolean;
+        minimalStep?: boolean;
+        directStep?: boolean;
+        orthogonalOptions?: OrthogonalEdgeOptions;
+        start?: EndStyle;
+        end?: EndStyle;
+        animate?: boolean;
+        label?: string;
+        enableHover?: boolean;
+        edgeClick?: null | (() => void);
         /**
              * @default 0.5
              * @type number
              * @description The position of the label along the edge. 0 is the source, 1 is the target.
-             */ labelPosition?: number | undefined;
-        width?: number | null | undefined;
-        color?: CSSColorString | null | undefined;
-        labelColor?: CSSColorString | null | undefined;
-        textColor?: CSSColorString | null | undefined;
-        cornerRadius?: number | undefined;
-        targetColor?: CSSColorString | null | undefined;
-        destroy?: (() => void) | undefined;
+             */ labelPosition?: number;
+        width?: number | null;
+        color?: CSSColorString | null;
+        labelColor?: CSSColorString | null;
+        textColor?: CSSColorString | null;
+        cornerRadius?: number;
+        targetColor?: CSSColorString | null;
+        destroy?: () => void;
     };
     events: {
         mousedown: MouseEvent;

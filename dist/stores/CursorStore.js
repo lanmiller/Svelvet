@@ -10,6 +10,10 @@ export const resizing = writable(false);
 // This is a global store/event listener for the raw cursor position
 // This can be refined
 export const cursorPositionRaw = readable({ x: 0, y: 0 }, (set) => {
+    // Check if we're in browser environment
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+        return () => { }; // Return empty cleanup function for SSR
+    }
     const updateCursorPosition = (e) => {
         set({ x: e.clientX, y: e.clientY });
     };
@@ -41,7 +45,7 @@ export const cursorPositionRaw = readable({ x: 0, y: 0 }, (set) => {
     document.addEventListener('mousemove', updateCursorPosition);
     window.addEventListener('touchstart', onTouchStart, true);
     return () => {
-        window.removeEventListener('mousemove', updateCursorPosition);
+        document.removeEventListener('mousemove', updateCursorPosition);
         window.removeEventListener('touchstart', onTouchStart);
         window.removeEventListener('touchmove', updateTouchPosition);
         window.removeEventListener('touchend', onTouchEnd);

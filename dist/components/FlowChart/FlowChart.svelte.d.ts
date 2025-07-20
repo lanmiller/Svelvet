@@ -2,8 +2,8 @@ import { SvelteComponentTyped } from "svelte";
 import type { NodeConfig } from '../../types';
 declare const __propDef: {
     props: {
-        mermaid?: string | undefined;
-        mermaidConfig?: Record<string, NodeConfig> | undefined;
+        mermaid?: string;
+        mermaidConfig?: Record<string, NodeConfig>;
     };
     events: {
         [evt: string]: CustomEvent<any>;

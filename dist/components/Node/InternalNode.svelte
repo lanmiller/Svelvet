@@ -49,12 +49,28 @@ const selectedNodes = selectedNodeGroup.nodes;
 const resized = writable(false);
 $:
   actualPosition = $position;
+let prevWidth = $widthStore;
+let prevHeight = $heightStore;
 $:
   selected = $selectedNodes.has(node);
 $:
   hidden = $hiddenNodes.has(node);
 $:
   fixedSizing = dimensionsProvided || $resized;
+$:
+  if ($widthStore !== prevWidth || $heightStore !== prevHeight) {
+    const oldDimensions = { width: prevWidth, height: prevHeight };
+    const newDimensions = { width: $widthStore, height: $heightStore };
+    dispatch("nodeDimensionsChanged", {
+      node,
+      nodeId: node.id.slice(2),
+      // Remove 'N-' prefix
+      oldDimensions,
+      newDimensions
+    });
+    prevWidth = $widthStore;
+    prevHeight = $heightStore;
+  }
 $:
   if (selected && $duplicate) {
     dispatch("duplicate", node);

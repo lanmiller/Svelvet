@@ -41,7 +41,7 @@ export let fixedZoom = false;
 export let pannable = true;
 const dispatch = createEventDispatcher();
 const selectedEdgeStore = writable(null);
-let graph = null;
+export let graph = null;
 let direction = TD ? "TD" : "LR";
 let graphKey = `G-${id || Date.now()}`;
 graph = createGraph(graphKey, { zoom, direction, editable, locked, translation });
@@ -55,37 +55,22 @@ setContext("edgesAboveNode", edgesAboveNode);
 setContext("graph", graph);
 setContext("selectedEdgeStore", selectedEdgeStore);
 function handleKeyDown(event) {
-  console.log(`\u{1F3B9} \u041D\u0430\u0436\u0430\u0442\u0430 \u043A\u043B\u0430\u0432\u0438\u0448\u0430: ${event.key}`);
   if ((event.key === "Delete" || event.key === "Backspace") && graph) {
     const selectedEdgeId = $selectedEdgeStore;
-    console.log(`\u{1F3AF} \u0412\u044B\u0434\u0435\u043B\u0435\u043D\u043D\u043E\u0435 \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u0435: ${selectedEdgeId}`);
     if (selectedEdgeId) {
       try {
-        console.log(`\u{1F5D1}\uFE0F \u0423\u0434\u0430\u043B\u044F\u0435\u043C \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u0435: ${selectedEdgeId}`);
         const allEdges = edgeStore.getAll();
-        console.log(`\u{1F50D} \u0412\u0441\u0435\u0433\u043E \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u0439 \u0432 store:`, allEdges.length);
         const targetEdge = allEdges.find((edge2) => edge2.id === selectedEdgeId);
-        console.log(`\u{1F50D} \u041D\u0430\u0439\u0434\u0435\u043D\u043D\u043E\u0435 \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u0435:`, targetEdge);
         if (targetEdge) {
           const edgeKeys = edgeStore.match(targetEdge.source, targetEdge.target);
-          console.log(`\u{1F50D} \u041D\u0430\u0439\u0434\u0435\u043D\u043D\u044B\u0435 \u043A\u043B\u044E\u0447\u0438 \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u044F:`, edgeKeys);
           if (edgeKeys.length > 0) {
             const deleted = edgeStore.delete(edgeKeys[0]);
-            console.log(`\u{1F5D1}\uFE0F \u0420\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442 \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u044F:`, deleted);
             if (deleted) {
               selectedEdgeStore.set(null);
-              console.log(`\u2705 \u0421\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u0435 ${selectedEdgeId} \u0443\u0434\u0430\u043B\u0435\u043D\u043E \u0443\u0441\u043F\u0435\u0448\u043D\u043E`);
-            } else {
-              console.warn(`\u274C \u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0443\u0434\u0430\u043B\u0438\u0442\u044C \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u0435 ${selectedEdgeId}`);
             }
-          } else {
-            console.warn(`\u274C \u041D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u044B \u043A\u043B\u044E\u0447\u0438 \u0434\u043B\u044F \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u044F ${selectedEdgeId}`);
           }
-        } else {
-          console.warn(`\u274C \u0421\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u0435 ${selectedEdgeId} \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E \u0432 store`);
         }
       } catch (error) {
-        console.error(`\u274C \u041E\u0448\u0438\u0431\u043A\u0430 \u043F\u0440\u0438 \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u0438 \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u044F:`, error);
       }
     }
   }

@@ -4,14 +4,14 @@ import type { CSSColorString } from '../../../types';
 declare const __propDef: {
     props: {
         parameterStore: CustomWritable<number>;
-        min?: number | undefined;
-        max?: number | undefined;
-        step?: number | undefined;
-        label?: string | undefined;
-        fixed?: number | undefined;
-        fontColor?: CSSColorString | null | undefined;
-        barColor?: CSSColorString | null | undefined;
-        bgColor?: CSSColorString | null | undefined;
+        min?: number;
+        max?: number;
+        step?: number;
+        label?: string;
+        fixed?: number;
+        fontColor?: CSSColorString | null;
+        barColor?: CSSColorString | null;
+        bgColor?: CSSColorString | null;
     };
     events: {
         [evt: string]: CustomEvent<any>;

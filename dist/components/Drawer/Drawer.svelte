@@ -353,7 +353,7 @@ const handleDrop = (e) => {
 		<slot name="toggle" slot="toggle" />
 	</Svelvet>
 </div>
-       
+
 <style>
 	/* Styles for the drop zone to make it visually distinct */
 	.drop_zone {
@@ -363,5 +363,3 @@ const handleDrop = (e) => {
 		position: relative;
 	}
 </style>
-
-

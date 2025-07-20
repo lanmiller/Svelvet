@@ -7,4 +7,3 @@ const groupBoxes = graph.groupBoxes;
 {#each Array.from($groupBoxes) as [id, group] (id)}
 	<GroupBoundingBox on:groupClick {...group} groupName={id} />
 {/each}
-

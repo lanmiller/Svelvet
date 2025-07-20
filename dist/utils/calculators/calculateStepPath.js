@@ -41,12 +41,12 @@ function calculateMinimalBendPath(source, target, buffer, preferredDirection) {
     if (preferredDirection === 'horizontal') {
         // Сначала горизонтально, потом вертикально
         const horizontalStep = {
-            x: deltaX - sourceExit.x - (target.direction.x * buffer),
+            x: deltaX - sourceExit.x - target.direction.x * buffer,
             y: 0
         };
         const verticalStep = {
             x: 0,
-            y: deltaY - sourceExit.y - (target.direction.y * buffer)
+            y: deltaY - sourceExit.y - target.direction.y * buffer
         };
         if (horizontalStep.x !== 0)
             steps.push(horizontalStep);
@@ -57,10 +57,10 @@ function calculateMinimalBendPath(source, target, buffer, preferredDirection) {
         // Сначала вертикально, потом горизонтально
         const verticalStep = {
             x: 0,
-            y: deltaY - sourceExit.y - (target.direction.y * buffer)
+            y: deltaY - sourceExit.y - target.direction.y * buffer
         };
         const horizontalStep = {
-            x: deltaX - sourceExit.x - (target.direction.x * buffer),
+            x: deltaX - sourceExit.x - target.direction.x * buffer,
             y: 0
         };
         if (verticalStep.y !== 0)
@@ -90,8 +90,8 @@ function calculateDirectPath(source, target, buffer) {
     steps.push(sourceExit);
     // Прямой путь к цели
     const directStep = {
-        x: deltaX - sourceExit.x - (target.direction.x * minBuffer),
-        y: deltaY - sourceExit.y - (target.direction.y * minBuffer)
+        x: deltaX - sourceExit.x - target.direction.x * minBuffer,
+        y: deltaY - sourceExit.y - target.direction.y * minBuffer
     };
     if (directStep.x !== 0 || directStep.y !== 0) {
         steps.push(directStep);
@@ -127,14 +127,14 @@ function calculateSmartPath(source, target, buffer, preferredDirection, maxBends
             // Якоря смотрят в одну сторону
             const midY = (source.y + target.y) / 2;
             steps.push({ x: 0, y: midY - source.y - sourceExit.y });
-            steps.push({ x: deltaX - sourceExit.x - (target.direction.x * buffer), y: 0 });
+            steps.push({ x: deltaX - sourceExit.x - target.direction.x * buffer, y: 0 });
             steps.push({ x: 0, y: target.y - midY });
         }
         else {
             // Якоря смотрят друг на друга
             const midX = (source.x + target.x) / 2;
             steps.push({ x: midX - source.x - sourceExit.x, y: 0 });
-            steps.push({ x: 0, y: deltaY - sourceExit.y - (target.direction.y * buffer) });
+            steps.push({ x: 0, y: deltaY - sourceExit.y - target.direction.y * buffer });
             steps.push({ x: target.x - midX, y: 0 });
         }
     }
@@ -144,26 +144,26 @@ function calculateSmartPath(source, target, buffer, preferredDirection, maxBends
             // Якоря смотрят в одну сторону
             const midX = (source.x + target.x) / 2;
             steps.push({ x: midX - source.x - sourceExit.x, y: 0 });
-            steps.push({ x: 0, y: deltaY - sourceExit.y - (target.direction.y * buffer) });
+            steps.push({ x: 0, y: deltaY - sourceExit.y - target.direction.y * buffer });
             steps.push({ x: target.x - midX, y: 0 });
         }
         else {
             // Якоря смотрят друг на друга
             const midY = (source.y + target.y) / 2;
             steps.push({ x: 0, y: midY - source.y - sourceExit.y });
-            steps.push({ x: deltaX - sourceExit.x - (target.direction.x * buffer), y: 0 });
+            steps.push({ x: deltaX - sourceExit.x - target.direction.x * buffer, y: 0 });
             steps.push({ x: 0, y: target.y - midY });
         }
     }
     else {
         // Смешанные направления - используем предпочтительное направление
         if (preferredDirection === 'horizontal') {
-            steps.push({ x: deltaX - sourceExit.x - (target.direction.x * buffer), y: 0 });
-            steps.push({ x: 0, y: deltaY - sourceExit.y - (target.direction.y * buffer) });
+            steps.push({ x: deltaX - sourceExit.x - target.direction.x * buffer, y: 0 });
+            steps.push({ x: 0, y: deltaY - sourceExit.y - target.direction.y * buffer });
         }
         else {
-            steps.push({ x: 0, y: deltaY - sourceExit.y - (target.direction.y * buffer) });
-            steps.push({ x: deltaX - sourceExit.x - (target.direction.x * buffer), y: 0 });
+            steps.push({ x: 0, y: deltaY - sourceExit.y - target.direction.y * buffer });
+            steps.push({ x: deltaX - sourceExit.x - target.direction.x * buffer, y: 0 });
         }
     }
     // Вход в целевую ноду

@@ -2,23 +2,23 @@ import { SvelteComponentTyped } from "svelte";
 import type { CSSColorString } from '../../types';
 declare const __propDef: {
     props: {
-        main?: string | undefined;
-        alt?: string | undefined;
+        main?: string;
+        alt?: string;
         /**
              * @deprecated
              * @default 'light_mode'
              * @description (Do not use. Will be deprecated in the next major release.) This prop accepts a string that corresponds to the the name of an icon from the Material Icons library.
              * @link https://fonts.google.com/icons
-             */ mainIcon?: string | undefined;
+             */ mainIcon?: string;
         /**
              * @deprecated
              * @default 'dark_mode'
              * @description (Do not use. Will be deprecated in the next major release.) This prop accepts a string that corresponds to the the name of an icon from the Material Icons library.
              *  @link https://fonts.google.com/icons
-             */ altIcon?: string | undefined;
-        corner?: string | undefined;
-        bgColor?: CSSColorString | null | undefined;
-        iconColor?: CSSColorString | null | undefined;
+             */ altIcon?: string;
+        corner?: string;
+        bgColor?: CSSColorString | null;
+        iconColor?: CSSColorString | null;
     };
     events: {
         [evt: string]: CustomEvent<any>;

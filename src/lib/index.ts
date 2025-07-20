@@ -19,29 +19,33 @@ import { getViewportCenter } from './utils/getters/getViewportCenter';
 import ContrastTheme from './components/ContrastTheme/ContrastTheme.svelte';
 
 // 🎯 НОВЫЕ ЭКСПОРТЫ ДЛЯ ОРТОГОНАЛЬНЫХ СОЕДИНЕНИЙ
-export { calculateSmartStepPath, type OrthogonalEdgeOptions, type SmartStepPathOptions } from './utils/calculators/calculateStepPath';
+export {
+	calculateSmartStepPath,
+	type OrthogonalEdgeOptions,
+	type SmartStepPathOptions
+} from './utils/calculators/calculateStepPath';
 
 export {
-    Svelvet,
-    Controls,
-    Minimap,
-    Node,
-    Anchor,
-    Edge,
-    Background,
-    Group,
-    Resizer,
-    Slider,
-    Toggle,
-    Knob,
-    RadioGroup,
-    ThemeToggle,
-    ColorPicker,
-    Drawer,
-    generateInput,
-    generateOutput,
-    getViewportCenter,
-    ContrastTheme
+	Svelvet,
+	Controls,
+	Minimap,
+	Node,
+	Anchor,
+	Edge,
+	Background,
+	Group,
+	Resizer,
+	Slider,
+	Toggle,
+	Knob,
+	RadioGroup,
+	ThemeToggle,
+	ColorPicker,
+	Drawer,
+	generateInput,
+	generateOutput,
+	getViewportCenter,
+	ContrastTheme
 };
 
-export * from './types'; 
+export * from './types';

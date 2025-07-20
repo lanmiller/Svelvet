@@ -2,7 +2,7 @@ import { SvelteComponentTyped } from "svelte";
 import type { CustomWritable, CSSColorString } from '../../../types';
 declare const __propDef: {
     props: {
-        size?: number | undefined;
+        size?: number;
         parameterStore: CustomWritable<CSSColorString>;
     };
     events: {

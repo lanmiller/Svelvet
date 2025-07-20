@@ -1,4 +1,4 @@
-import { derived, writable } from 'svelte/store';
+import { derived, writable, get } from 'svelte/store';
 import { createStore } from './createStore';
 import { createEdgeStore } from './createEdgeStore';
 import { cursorPositionRaw } from '../../stores/CursorStore';
@@ -51,7 +51,18 @@ export function createGraph(id, config) {
         }),
         groupBoxes: createStore(),
         activeGroup: writable(null),
-        initialNodePositions: writable([])
+        initialNodePositions: writable([]),
+        getNodeDimensions: (nodeId) => {
+            const nodeKey = typeof nodeId === 'string' && nodeId.slice(0, 2) === 'N-'
+                ? nodeId
+                : `N-${nodeId}`;
+            const node = nodes.get(nodeKey);
+            if (!node)
+                return null;
+            const width = get(node.dimensions.width);
+            const height = get(node.dimensions.height);
+            return { width, height };
+        }
     };
     return graph;
 }

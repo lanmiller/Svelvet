@@ -2,12 +2,12 @@ import { SvelteComponentTyped } from "svelte";
 import type { CSSColorString } from '../../types';
 declare const __propDef: {
     props: {
-        contrastThemes?: string[] | undefined;
-        corner?: string | undefined;
-        bgColor?: CSSColorString | null | undefined;
-        textColor?: CSSColorString | null | undefined;
-        nodeColor?: CSSColorString | null | undefined;
-        edgeColor?: CSSColorString | null | undefined;
+        contrastThemes?: string[];
+        corner?: string;
+        bgColor?: CSSColorString | null;
+        textColor?: CSSColorString | null;
+        nodeColor?: CSSColorString | null;
+        edgeColor?: CSSColorString | null;
     };
     events: {
         [evt: string]: CustomEvent<any>;

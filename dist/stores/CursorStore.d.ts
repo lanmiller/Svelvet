@@ -1,4 +1,3 @@
-/// <reference types="svelte" />
 export declare const initialClickPosition: import("svelte/store").Writable<{
     x: number;
     y: number;

@@ -3,17 +3,17 @@ import type { CSSColorString } from '../../types';
 import type { BackgroundStyles } from '../../types/general';
 declare const __propDef: {
     props: {
-        style?: BackgroundStyles | undefined;
-        gridWidth?: number | undefined;
-        dotSize?: number | undefined;
-        bgColor?: CSSColorString | null | undefined;
-        dotColor?: CSSColorString | null | undefined;
-        opacityThreshold?: number | undefined;
-        majorGrid?: number | undefined;
+        style?: BackgroundStyles;
+        gridWidth?: number;
+        dotSize?: number;
+        bgColor?: CSSColorString | null;
+        dotColor?: CSSColorString | null;
+        opacityThreshold?: number;
+        majorGrid?: number;
         /**
              * @default 0.4
              * @description The minimum opacity of the background grid
-             */ minOpacity?: number | undefined;
+             */ minOpacity?: number;
     };
     events: {
         [evt: string]: CustomEvent<any>;

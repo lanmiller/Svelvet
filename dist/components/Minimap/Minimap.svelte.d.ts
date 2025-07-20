@@ -2,13 +2,13 @@ import { SvelteComponentTyped } from "svelte";
 import type { CSSColorString, Corner } from '../../types';
 declare const __propDef: {
     props: {
-        width?: number | undefined;
-        height?: number | undefined;
-        mapColor?: CSSColorString | null | undefined;
-        nodeColor?: CSSColorString | null | undefined;
-        borderColor?: CSSColorString | null | undefined;
-        corner?: Corner | undefined;
-        hideable?: boolean | undefined;
+        width?: number;
+        height?: number;
+        mapColor?: CSSColorString | null;
+        nodeColor?: CSSColorString | null;
+        borderColor?: CSSColorString | null;
+        corner?: Corner;
+        hideable?: boolean;
     };
     events: {
         [evt: string]: CustomEvent<any>;

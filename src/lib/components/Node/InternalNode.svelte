@@ -82,15 +82,13 @@
 		const oldDimensions = { width: prevWidth, height: prevHeight };
 		const newDimensions = { width: $widthStore, height: $heightStore };
 
-		// Only dispatch if both values are not zero (initial state)
-		if (prevWidth !== 0 || prevHeight !== 0) {
-			dispatch('nodeDimensionsChanged', {
-				node,
-				nodeId: node.id.slice(2), // Remove 'N-' prefix
-				oldDimensions,
-				newDimensions
-			});
-		}
+		// Dispatch event whenever dimensions change (including initial measurement)
+		dispatch('nodeDimensionsChanged', {
+			node,
+			nodeId: node.id.slice(2), // Remove 'N-' prefix
+			oldDimensions,
+			newDimensions
+		});
 
 		prevWidth = $widthStore;
 		prevHeight = $heightStore;
