@@ -1,1 +1,2 @@
-export const buildPath = (string, xStep, yStep, arcString) => string + ` l ${xStep} ${yStep} ` + arcString;
+export const buildPath = (string, xStep, yStep, arcString) =>
+	string + ` l ${xStep} ${yStep} ` + arcString;

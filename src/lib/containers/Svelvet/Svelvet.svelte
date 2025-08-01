@@ -150,7 +150,6 @@
 
 			if (selectedEdgeId) {
 				try {
-
 					// Получаем все соединения и ищем нужное по ID
 					const allEdges = edgeStore.getAll();
 

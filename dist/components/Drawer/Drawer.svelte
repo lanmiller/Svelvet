@@ -204,76 +204,76 @@ const svelvetProps: SvelvetConfig = {
 	</Svelvet>
 </div> -->
 
-<script>import { Node, Svelvet, Anchor, Edge } from "../..";
-import { defaultNodePropsStore } from "./DrawerNode.svelte";
-export let width = 0;
-export let height = 0;
-export let minimap = false;
-export let translation = { x: 0, y: 0 };
-export let controls = false;
-export let edge = null;
-export let edgeStyle = "bezier";
-export let snapTo = 0;
-export let editable = false;
-export let fitView = false;
-export let locked = false;
-export let zoom = 1;
-export let theme = "light";
-export let mermaid = "";
-export let mermaidConfig = {};
-export let TD = false;
-export let disableSelection = false;
-export let raiseEdgesOnSelect = false;
-export let modifier = "meta";
-export let trackpadPan = false;
-export let toggle = false;
-const svelvetProps = {
-  width,
-  height,
-  minimap,
-  translation,
-  controls,
-  edge,
-  edgeStyle,
-  snapTo,
-  editable,
-  fitView,
-  locked,
-  zoom,
-  theme,
-  mermaid,
-  mermaidConfig,
-  TD,
-  disableSelection,
-  raiseEdgesOnSelect,
-  modifier,
-  trackpadPan,
-  toggle
-};
-let defaultNodes = $defaultNodePropsStore;
-let dropped_in;
-const handleDragEnter = () => {
-  if (!dropped_in)
-    dropped_in = true;
-};
-const handleDragLeave = () => {
-  dropped_in = false;
-};
-const onDragOver = (e) => {
-  e.preventDefault();
-  return false;
-};
-const handleDrop = (e) => {
-  e.stopPropagation();
-  console.log("Evento handleDrop ejecutado");
-  const moveEvent = new MouseEvent("mousemove", {
-    clientX: e.clientX,
-    clientY: e.clientY,
-    bubbles: true
-  });
-  const target = e.target;
-  target.dispatchEvent(moveEvent);
-};
+<script>
+	import { Node, Svelvet, Anchor, Edge } from '../..';
+	import { defaultNodePropsStore } from './DrawerNode.svelte';
+	export let width = 0;
+	export let height = 0;
+	export let minimap = false;
+	export let translation = { x: 0, y: 0 };
+	export let controls = false;
+	export let edge = null;
+	export let edgeStyle = 'bezier';
+	export let snapTo = 0;
+	export let editable = false;
+	export let fitView = false;
+	export let locked = false;
+	export let zoom = 1;
+	export let theme = 'light';
+	export let mermaid = '';
+	export let mermaidConfig = {};
+	export let TD = false;
+	export let disableSelection = false;
+	export let raiseEdgesOnSelect = false;
+	export let modifier = 'meta';
+	export let trackpadPan = false;
+	export let toggle = false;
+	const svelvetProps = {
+		width,
+		height,
+		minimap,
+		translation,
+		controls,
+		edge,
+		edgeStyle,
+		snapTo,
+		editable,
+		fitView,
+		locked,
+		zoom,
+		theme,
+		mermaid,
+		mermaidConfig,
+		TD,
+		disableSelection,
+		raiseEdgesOnSelect,
+		modifier,
+		trackpadPan,
+		toggle
+	};
+	let defaultNodes = $defaultNodePropsStore;
+	let dropped_in;
+	const handleDragEnter = () => {
+		if (!dropped_in) dropped_in = true;
+	};
+	const handleDragLeave = () => {
+		dropped_in = false;
+	};
+	const onDragOver = (e) => {
+		e.preventDefault();
+		return false;
+	};
+	const handleDrop = (e) => {
+		e.stopPropagation();
+		console.log('Evento handleDrop ejecutado');
+		const moveEvent = new MouseEvent('mousemove', {
+			clientX: e.clientX,
+			clientY: e.clientY,
+			bubbles: true
+		});
+		const target = e.target;
+		target.dispatchEvent(moveEvent);
+	};
 </script>
 
 <div

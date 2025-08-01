@@ -1,128 +1,126 @@
-<script context="module">import { writable } from "svelte/store";
-import { addProps } from "../../utils";
-import { getSnappedPosition } from "../../utils/snapGrid";
-export const defaultNodePropsStore = writable([]);
-let nodeProps = {
-  width: 200,
-  height: 100,
-  x: 0,
-  y: 0
-};
-let bgColor;
-let borderColor;
-let label;
-let width = 200;
-let height = 100;
-let locked;
-let center;
-let inputs;
-let outputs;
-let rotation;
-let zIndex;
-let TD;
-let LR;
-let useDefaults;
-let nodeDirection;
-let x = 0;
-let y = 0;
-export const createNodeProps = (edgeProps, anchorProps) => {
-  const snappedPosition = getSnappedPosition(x, y);
-  x = snappedPosition.x;
-  y = snappedPosition.y;
-  const nodeProps2 = { x, y };
-  const nodePropNames = [
-    "bgColor",
-    "borderColor",
-    "label",
-    "width",
-    "height",
-    "locked",
-    "center",
-    "inputs",
-    "outputs",
-    "rotation",
-    "zIndex",
-    "TD",
-    "LR",
-    "useDefaults"
-  ];
-  const nodePropsArray = [
-    bgColor,
-    borderColor,
-    label,
-    width,
-    height,
-    locked,
-    center,
-    inputs,
-    outputs,
-    rotation,
-    zIndex,
-    TD,
-    LR,
-    useDefaults
-  ];
-  addProps(nodePropNames, nodePropsArray, nodeProps2);
-  console.log("Nodo antes de props insertado", nodeProps2);
-  if (anchorProps)
-    nodeProps2.anchors = anchorProps;
-  if (edgeProps)
-    nodeProps2.edgeProps = edgeProps;
-  console.log("Nodo despues de props insertado", nodeProps2);
-  defaultNodePropsStore.update((nodes) => {
-    const updatedNodes = [...nodes, nodeProps2];
-    console.log("updated store:", updatedNodes);
-    return updatedNodes;
-  });
-  return nodeProps2;
-};
-const handleNodeResetButtonClick = (e) => {
-  bgColor = void 0;
-  borderColor = void 0;
-  label = void 0;
-  width = 200;
-  height = 100;
-  inputs = void 0;
-  outputs = void 0;
-  locked = void 0;
-  center = void 0;
-  rotation = void 0;
-  zIndex = void 0;
-  TD = void 0;
-  LR = void 0;
-  useDefaults = void 0;
-  x = 0;
-  y = 0;
-  const formElement = e.currentTarget;
-  formElement.reset();
-};
-const handleLockedButtonClick = (e) => {
-  const target = e.target;
-  locked = target.checked;
-};
-const handleCenterButtonClick = (e) => {
-  const target = e.target;
-  center = target.checked;
-};
-const handleUseDefaultsButtonClick = (e) => {
-  const target = e.target;
-  useDefaults = target.checked;
-};
-const handleAnchorPositionButton = (e) => {
-  const target = e.target;
-  if (target.value == "")
-    nodeDirection = void 0;
-  else {
-    nodeDirection = target.value;
-    if (nodeDirection === "LR") {
-      LR = true;
-      TD = false;
-    } else {
-      TD = true;
-      LR = false;
-    }
-  }
-};
+<script context="module">
+	import { writable } from 'svelte/store';
+	import { addProps } from '../../utils';
+	import { getSnappedPosition } from '../../utils/snapGrid';
+	export const defaultNodePropsStore = writable([]);
+	let nodeProps = {
+		width: 200,
+		height: 100,
+		x: 0,
+		y: 0
+	};
+	let bgColor;
+	let borderColor;
+	let label;
+	let width = 200;
+	let height = 100;
+	let locked;
+	let center;
+	let inputs;
+	let outputs;
+	let rotation;
+	let zIndex;
+	let TD;
+	let LR;
+	let useDefaults;
+	let nodeDirection;
+	let x = 0;
+	let y = 0;
+	export const createNodeProps = (edgeProps, anchorProps) => {
+		const snappedPosition = getSnappedPosition(x, y);
+		x = snappedPosition.x;
+		y = snappedPosition.y;
+		const nodeProps2 = { x, y };
+		const nodePropNames = [
+			'bgColor',
+			'borderColor',
+			'label',
+			'width',
+			'height',
+			'locked',
+			'center',
+			'inputs',
+			'outputs',
+			'rotation',
+			'zIndex',
+			'TD',
+			'LR',
+			'useDefaults'
+		];
+		const nodePropsArray = [
+			bgColor,
+			borderColor,
+			label,
+			width,
+			height,
+			locked,
+			center,
+			inputs,
+			outputs,
+			rotation,
+			zIndex,
+			TD,
+			LR,
+			useDefaults
+		];
+		addProps(nodePropNames, nodePropsArray, nodeProps2);
+		console.log('Nodo antes de props insertado', nodeProps2);
+		if (anchorProps) nodeProps2.anchors = anchorProps;
+		if (edgeProps) nodeProps2.edgeProps = edgeProps;
+		console.log('Nodo despues de props insertado', nodeProps2);
+		defaultNodePropsStore.update((nodes) => {
+			const updatedNodes = [...nodes, nodeProps2];
+			console.log('updated store:', updatedNodes);
+			return updatedNodes;
+		});
+		return nodeProps2;
+	};
+	const handleNodeResetButtonClick = (e) => {
+		bgColor = void 0;
+		borderColor = void 0;
+		label = void 0;
+		width = 200;
+		height = 100;
+		inputs = void 0;
+		outputs = void 0;
+		locked = void 0;
+		center = void 0;
+		rotation = void 0;
+		zIndex = void 0;
+		TD = void 0;
+		LR = void 0;
+		useDefaults = void 0;
+		x = 0;
+		y = 0;
+		const formElement = e.currentTarget;
+		formElement.reset();
+	};
+	const handleLockedButtonClick = (e) => {
+		const target = e.target;
+		locked = target.checked;
+	};
+	const handleCenterButtonClick = (e) => {
+		const target = e.target;
+		center = target.checked;
+	};
+	const handleUseDefaultsButtonClick = (e) => {
+		const target = e.target;
+		useDefaults = target.checked;
+	};
+	const handleAnchorPositionButton = (e) => {
+		const target = e.target;
+		if (target.value == '') nodeDirection = void 0;
+		else {
+			nodeDirection = target.value;
+			if (nodeDirection === 'LR') {
+				LR = true;
+				TD = false;
+			} else {
+				TD = true;
+				LR = false;
+			}
+		}
+	};
 </script>
 
 <div id="nodeContainer">

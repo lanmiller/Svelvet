@@ -545,7 +545,7 @@
 		// If it does, it means the user is using a trackpad
 		// Check if we should pan instead of zoom
 		const modifierPressed = e[`${modifier}Key`];
-		
+
 		// Pan if: trackpadPan is true AND modifier is NOT pressed
 		// OR if: trackpadPan is false AND modifier IS pressed
 		if (trackpadPan && !modifierPressed) {
@@ -555,7 +555,7 @@
 			};
 			return;
 		}
-		
+
 		// If trackpadPan is false and modifier is not pressed, we zoom (default behavior)
 		// If trackpadPan is true and modifier is pressed, we also zoom
 
@@ -672,7 +672,7 @@
 	{title}
 	style:width={width ? width + 'px' : '100%'}
 	style:height={height ? height + 'px' : '100%'}
-	style:cursor={spacePressed ? 'grab' : (isMovable ? 'grabbing' : (pannable ? 'move' : 'default'))}
+	style:cursor={spacePressed ? 'grab' : isMovable ? 'grabbing' : pannable ? 'move' : 'default'}
 	on:wheel|preventDefault={handleScroll}
 	on:mousedown|preventDefault|self={onMouseDown}
 	on:touchend|preventDefault={onTouchEnd}

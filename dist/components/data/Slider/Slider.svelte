@@ -1,124 +1,119 @@
-<script>import { initialClickPosition } from "../../../stores/CursorStore";
-import { getContext } from "svelte";
-import { isArrow } from "../../../types";
-import { roundNum } from "../../../utils";
-import { tracking } from "../../../stores/CursorStore";
-export let parameterStore;
-export let min = 0;
-export let max = 100;
-export let step = 1;
-export let label = "Value";
-export let fixed = 2;
-export let fontColor = null;
-export let barColor = null;
-export let bgColor = null;
-$:
-  connected = typeof parameterStore.set !== "function";
-let graph = getContext("graph");
-let node = getContext("node");
-const groups = graph.groups;
-const selected = $groups.selected;
-const activeGroup = graph.activeGroup;
-$:
-  width = node.dimensions.width;
-let sliderWidth;
-let sliderElement;
-let sliding = false;
-let previousX = 0;
-let pixelsMoved = 0;
-$:
-  cursor = graph.cursor;
-$:
-  if (sliding) {
-    const deltaX = $cursor.x - previousX;
-    calculateSlide(deltaX);
-    previousX = $cursor.x;
-  }
-function startSlide(e) {
-  e.stopPropagation();
-  e.preventDefault();
-  $initialClickPosition = { x: $cursor.x, y: $cursor.y };
-  previousX = $cursor.x;
-  window.addEventListener("mouseup", stopSlide, { once: true });
-  sliding = true;
-}
-let previousValue = $parameterStore;
-function startTouchSlide(e) {
-  $activeGroup = null;
-  selected.nodes.set(/* @__PURE__ */ new Set());
-  tracking.set(false);
-  e.stopPropagation();
-  e.preventDefault();
-  $initialClickPosition = { x: $cursor.x, y: $cursor.y };
-  previousX = $cursor.x;
-  window.addEventListener("touchend", stopSlide, { once: true });
-  sliding = true;
-}
-function stopSlide() {
-  if (previousValue === $parameterStore) {
-    sliderElement.focus();
-    sliderElement.select();
-  } else {
-    previousValue = $parameterStore;
-  }
-  sliding = false;
-  window.removeEventListener("mouseup", stopSlide);
-}
-function slideable(node2) {
-  node2.addEventListener("mousedown", startSlide);
-  node2.addEventListener("touchstart", startTouchSlide);
-  return {
-    destroy() {
-      node2.removeEventListener("mousedown", startSlide);
-    }
-  };
-}
-function updateValue(delta, increment = step) {
-  if (typeof $parameterStore !== "number")
-    return;
-  $parameterStore = roundNum(
-    Math.max(min, Math.min($parameterStore + delta * increment, max)),
-    3
-  );
-}
-function calculateSlide(cursorChange, increment = step) {
-  if (typeof $parameterStore !== "number")
-    return;
-  const pixelsToMove = $width * 0.7 / ((max - min) / increment);
-  pixelsMoved += cursorChange;
-  if (Math.abs(pixelsMoved) >= pixelsToMove) {
-    const incrementsToMove = Math.floor(Math.abs(pixelsMoved) / pixelsToMove);
-    if (pixelsMoved > 0) {
-      updateValue(incrementsToMove);
-    } else {
-      updateValue(-incrementsToMove);
-    }
-    pixelsMoved = pixelsMoved > 0 ? pixelsMoved - incrementsToMove * pixelsToMove : pixelsMoved + incrementsToMove * pixelsToMove;
-  }
-}
-function validateInput() {
-  const number = parseFloat(sliderElement.value);
-  if (!Number.isNaN(number)) {
-    if (number <= min) {
-      $parameterStore = min;
-    } else if (number >= max) {
-      $parameterStore = max;
-    } else {
-      $parameterStore = roundNum(number, 2);
-    }
-  }
-  sliderElement.value = JSON.stringify($parameterStore);
-  sliderElement.blur();
-}
-$:
-  percentageSlid = ($parameterStore - min) / (max - min) * 100;
-$:
-  CSSpercentage = `${percentageSlid}%`;
-$:
-  sliderStyle = `linear-gradient(
+<script>
+	import { initialClickPosition } from '../../../stores/CursorStore';
+	import { getContext } from 'svelte';
+	import { isArrow } from '../../../types';
+	import { roundNum } from '../../../utils';
+	import { tracking } from '../../../stores/CursorStore';
+	export let parameterStore;
+	export let min = 0;
+	export let max = 100;
+	export let step = 1;
+	export let label = 'Value';
+	export let fixed = 2;
+	export let fontColor = null;
+	export let barColor = null;
+	export let bgColor = null;
+	$: connected = typeof parameterStore.set !== 'function';
+	let graph = getContext('graph');
+	let node = getContext('node');
+	const groups = graph.groups;
+	const selected = $groups.selected;
+	const activeGroup = graph.activeGroup;
+	$: width = node.dimensions.width;
+	let sliderWidth;
+	let sliderElement;
+	let sliding = false;
+	let previousX = 0;
+	let pixelsMoved = 0;
+	$: cursor = graph.cursor;
+	$: if (sliding) {
+		const deltaX = $cursor.x - previousX;
+		calculateSlide(deltaX);
+		previousX = $cursor.x;
+	}
+	function startSlide(e) {
+		e.stopPropagation();
+		e.preventDefault();
+		$initialClickPosition = { x: $cursor.x, y: $cursor.y };
+		previousX = $cursor.x;
+		window.addEventListener('mouseup', stopSlide, { once: true });
+		sliding = true;
+	}
+	let previousValue = $parameterStore;
+	function startTouchSlide(e) {
+		$activeGroup = null;
+		selected.nodes.set(/* @__PURE__ */ new Set());
+		tracking.set(false);
+		e.stopPropagation();
+		e.preventDefault();
+		$initialClickPosition = { x: $cursor.x, y: $cursor.y };
+		previousX = $cursor.x;
+		window.addEventListener('touchend', stopSlide, { once: true });
+		sliding = true;
+	}
+	function stopSlide() {
+		if (previousValue === $parameterStore) {
+			sliderElement.focus();
+			sliderElement.select();
+		} else {
+			previousValue = $parameterStore;
+		}
+		sliding = false;
+		window.removeEventListener('mouseup', stopSlide);
+	}
+	function slideable(node2) {
+		node2.addEventListener('mousedown', startSlide);
+		node2.addEventListener('touchstart', startTouchSlide);
+		return {
+			destroy() {
+				node2.removeEventListener('mousedown', startSlide);
+			}
+		};
+	}
+	function updateValue(delta, increment = step) {
+		if (typeof $parameterStore !== 'number') return;
+		$parameterStore = roundNum(
+			Math.max(min, Math.min($parameterStore + delta * increment, max)),
+			3
+		);
+	}
+	function calculateSlide(cursorChange, increment = step) {
+		if (typeof $parameterStore !== 'number') return;
+		const pixelsToMove = ($width * 0.7) / ((max - min) / increment);
+		pixelsMoved += cursorChange;
+		if (Math.abs(pixelsMoved) >= pixelsToMove) {
+			const incrementsToMove = Math.floor(Math.abs(pixelsMoved) / pixelsToMove);
+			if (pixelsMoved > 0) {
+				updateValue(incrementsToMove);
+			} else {
+				updateValue(-incrementsToMove);
+			}
+			pixelsMoved =
+				pixelsMoved > 0
+					? pixelsMoved - incrementsToMove * pixelsToMove
+					: pixelsMoved + incrementsToMove * pixelsToMove;
+		}
+	}
+	function validateInput() {
+		const number = parseFloat(sliderElement.value);
+		if (!Number.isNaN(number)) {
+			if (number <= min) {
+				$parameterStore = min;
+			} else if (number >= max) {
+				$parameterStore = max;
+			} else {
+				$parameterStore = roundNum(number, 2);
+			}
+		}
+		sliderElement.value = JSON.stringify($parameterStore);
+		sliderElement.blur();
+	}
+	$: percentageSlid = (($parameterStore - min) / (max - min)) * 100;
+	$: CSSpercentage = `${percentageSlid}%`;
+	$: sliderStyle = `linear-gradient(
 			90deg,
-			${barColor || "var(--primary-color, var(--default-primary-color))"} ${CSSpercentage},
-			${bgColor || "var(--accent-color, var(--default-accent-color))"} ${CSSpercentage}
+			${barColor || 'var(--primary-color, var(--default-primary-color))'} ${CSSpercentage},
+			${bgColor || 'var(--accent-color, var(--default-accent-color))'} ${CSSpercentage}
 		)`;
 </script>
 

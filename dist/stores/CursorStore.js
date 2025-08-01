@@ -10,44 +10,43 @@ export const resizing = writable(false);
 // This is a global store/event listener for the raw cursor position
 // This can be refined
 export const cursorPositionRaw = readable({ x: 0, y: 0 }, (set) => {
-    // Check if we're in browser environment
-    if (typeof window === 'undefined' || typeof document === 'undefined') {
-        return () => { }; // Return empty cleanup function for SSR
-    }
-    const updateCursorPosition = (e) => {
-        set({ x: e.clientX, y: e.clientY });
-    };
-    const updateTouchPosition = (e) => {
-        if (e.touches.length === 2) {
-            const distance = getTouchDistance(e.touches[0], e.touches[1]);
-            touchDistance.set(distance);
-            const touchPoint = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-            set(touchPoint);
-        }
-        else if (e.touches.length === 1) {
-            const x = e.touches[0].clientX;
-            const y = e.touches[0].clientY;
-            const touchPoint = { x, y };
-            set(touchPoint);
-            tracking.set(true);
-        }
-    };
-    const onTouchStart = (e) => {
-        updateTouchPosition(e);
-        window.addEventListener('touchend', onTouchEnd);
-        window.addEventListener('touchmove', updateTouchPosition);
-    };
-    const onTouchEnd = () => {
-        tracking.set(false);
-        touchDistance.set(0);
-        window.removeEventListener('touchmove', updateTouchPosition);
-    };
-    document.addEventListener('mousemove', updateCursorPosition);
-    window.addEventListener('touchstart', onTouchStart, true);
-    return () => {
-        document.removeEventListener('mousemove', updateCursorPosition);
-        window.removeEventListener('touchstart', onTouchStart);
-        window.removeEventListener('touchmove', updateTouchPosition);
-        window.removeEventListener('touchend', onTouchEnd);
-    };
+	// Check if we're in browser environment
+	if (typeof window === 'undefined' || typeof document === 'undefined') {
+		return () => {}; // Return empty cleanup function for SSR
+	}
+	const updateCursorPosition = (e) => {
+		set({ x: e.clientX, y: e.clientY });
+	};
+	const updateTouchPosition = (e) => {
+		if (e.touches.length === 2) {
+			const distance = getTouchDistance(e.touches[0], e.touches[1]);
+			touchDistance.set(distance);
+			const touchPoint = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+			set(touchPoint);
+		} else if (e.touches.length === 1) {
+			const x = e.touches[0].clientX;
+			const y = e.touches[0].clientY;
+			const touchPoint = { x, y };
+			set(touchPoint);
+			tracking.set(true);
+		}
+	};
+	const onTouchStart = (e) => {
+		updateTouchPosition(e);
+		window.addEventListener('touchend', onTouchEnd);
+		window.addEventListener('touchmove', updateTouchPosition);
+	};
+	const onTouchEnd = () => {
+		tracking.set(false);
+		touchDistance.set(0);
+		window.removeEventListener('touchmove', updateTouchPosition);
+	};
+	document.addEventListener('mousemove', updateCursorPosition);
+	window.addEventListener('touchstart', onTouchStart, true);
+	return () => {
+		document.removeEventListener('mousemove', updateCursorPosition);
+		window.removeEventListener('touchstart', onTouchStart);
+		window.removeEventListener('touchmove', updateTouchPosition);
+		window.removeEventListener('touchend', onTouchEnd);
+	};
 });

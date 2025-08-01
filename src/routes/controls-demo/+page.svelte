@@ -4,10 +4,10 @@
 
 <div class="container">
 	<h1>Демо управления Svelvet</h1>
-	
+
 	<div class="info">
 		<h2>Новые возможности управления:</h2>
-		
+
 		<h3>🖱️ Мышь/Тачпад:</h3>
 		<ul>
 			<li><strong>Пробел + перетаскивание</strong> - перемещение холста (как в Figma)</li>
@@ -29,12 +29,7 @@
 		<div class="demo-section">
 			<h3>Вариант 1: Скролл = движение (рекомендуется)</h3>
 			<div class="canvas-container">
-				<Svelvet 
-					trackpadPan={true}
-					modifier="ctrl"
-					minimap
-					controls
-				>
+				<Svelvet trackpadPan={true} modifier="ctrl" minimap controls>
 					<Node id="1" position={{ x: 100, y: 100 }}>
 						<div class="node-content">
 							<h4>Нода 1</h4>
@@ -61,11 +56,7 @@
 		<div class="demo-section">
 			<h3>Вариант 2: Скролл = зум (по умолчанию)</h3>
 			<div class="canvas-container">
-				<Svelvet 
-					trackpadPan={false}
-					minimap
-					controls
-				>
+				<Svelvet trackpadPan={false} minimap controls>
 					<Node id="4" position={{ x: 100, y: 100 }}>
 						<div class="node-content">
 							<h4>Нода 4</h4>

@@ -1,65 +1,64 @@
-<script>import { onMount } from "svelte";
-import { cursorPositionRaw } from "../../stores/CursorStore";
-export let graph;
-export let anchor;
-export let adding = false;
-export let creating = false;
-export let color = null;
-const { groups } = graph;
-let nodes;
-let box;
-$:
-  selectedNodes = $groups.selected.nodes;
-$:
-  height = $cursorPositionRaw.y - anchor.y - anchor.top;
-$:
-  width = $cursorPositionRaw.x - anchor.x - anchor.left;
-$:
-  top = Math.min(anchor.y, anchor.y + height);
-$:
-  left = Math.min(anchor.x, anchor.x + width);
-$:
-  CSStop = `${top}px`;
-$:
-  CSSleft = `${left}px`;
-$:
-  CSSheight = `${Math.abs(height)}px`;
-$:
-  CSSwidth = `${Math.abs(width)}px`;
-$:
-  if (width || height) {
-    selectNodes();
-  }
-onMount(updateNodes);
-function updateNodes() {
-  const DOMnodes = Array.from(document.querySelectorAll(".svelvet-node"));
-  nodes = DOMnodes.map((node) => {
-    const { top: top2, left: left2, width: width2, height: height2 } = node.getBoundingClientRect();
-    return { id: node.id, top: top2, left: left2, width: width2, height: height2 };
-  });
-}
-function selectNodes() {
-  if (!nodes)
-    return;
-  const nodesUnderSelection = nodes.reduce((accumulator, node) => {
-    if (left + anchor.left <= node.left && top + anchor.top <= node.top && left + anchor.left + Math.abs(width) >= node.left + node.width && top + anchor.top + Math.abs(height) >= node.top + node.height) {
-      const id = node.id;
-      const selectedNode = graph.nodes.get(id);
-      if (!selectedNode)
-        return accumulator;
-      accumulator.push(selectedNode);
-    }
-    return accumulator;
-  }, []);
-  if (adding) {
-    nodesUnderSelection.forEach((node) => {
-      $selectedNodes.add(node);
-    });
-  } else {
-    $selectedNodes = new Set(nodesUnderSelection);
-  }
-  $selectedNodes = $selectedNodes;
-}
+<script>
+	import { onMount } from 'svelte';
+	import { cursorPositionRaw } from '../../stores/CursorStore';
+	export let graph;
+	export let anchor;
+	export let adding = false;
+	export let creating = false;
+	export let color = null;
+	const { groups } = graph;
+	let nodes;
+	let box;
+	$: selectedNodes = $groups.selected.nodes;
+	$: height = $cursorPositionRaw.y - anchor.y - anchor.top;
+	$: width = $cursorPositionRaw.x - anchor.x - anchor.left;
+	$: top = Math.min(anchor.y, anchor.y + height);
+	$: left = Math.min(anchor.x, anchor.x + width);
+	$: CSStop = `${top}px`;
+	$: CSSleft = `${left}px`;
+	$: CSSheight = `${Math.abs(height)}px`;
+	$: CSSwidth = `${Math.abs(width)}px`;
+	$: if (width || height) {
+		selectNodes();
+	}
+	onMount(updateNodes);
+	function updateNodes() {
+		const DOMnodes = Array.from(document.querySelectorAll('.svelvet-node'));
+		nodes = DOMnodes.map((node) => {
+			const {
+				top: top2,
+				left: left2,
+				width: width2,
+				height: height2
+			} = node.getBoundingClientRect();
+			return { id: node.id, top: top2, left: left2, width: width2, height: height2 };
+		});
+	}
+	function selectNodes() {
+		if (!nodes) return;
+		const nodesUnderSelection = nodes.reduce((accumulator, node) => {
+			if (
+				left + anchor.left <= node.left &&
+				top + anchor.top <= node.top &&
+				left + anchor.left + Math.abs(width) >= node.left + node.width &&
+				top + anchor.top + Math.abs(height) >= node.top + node.height
+			) {
+				const id = node.id;
+				const selectedNode = graph.nodes.get(id);
+				if (!selectedNode) return accumulator;
+				accumulator.push(selectedNode);
+			}
+			return accumulator;
+		}, []);
+		if (adding) {
+			nodesUnderSelection.forEach((node) => {
+				$selectedNodes.add(node);
+			});
+		} else {
+			$selectedNodes = new Set(nodesUnderSelection);
+		}
+		$selectedNodes = $selectedNodes;
+	}
 </script>
 
 <div

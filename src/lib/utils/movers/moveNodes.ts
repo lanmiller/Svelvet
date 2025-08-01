@@ -102,12 +102,12 @@ export function moveNodes(graph: Graph, snapTo: number) {
 			}
 
 			if (!groupBox) {
-				moveElement(initialPosition, delta, position);
+				moveElement(initialPosition, delta, position, 'id' in node ? node : undefined);
 			} else {
 				const nodeWidth = get(node.dimensions.width);
 				const nodeHeight = get(node.dimensions.height);
 				const bounds = calculateRelativeBounds(groupBox, nodeWidth, nodeHeight);
-				moveElementWithBounds(initialPosition, delta, position, bounds);
+				moveElementWithBounds(initialPosition, delta, position, bounds, 'id' in node ? node : undefined);
 			}
 		});
 
@@ -119,23 +119,60 @@ export function moveNodes(graph: Graph, snapTo: number) {
 	}
 }
 
-export function moveElement(initialPosition: XYPair, delta: XYPair, position: Writable<XYPair>) {
-	position.set({
+export function moveElement(
+	initialPosition: XYPair,
+	delta: XYPair,
+	position: Writable<XYPair>,
+	node?: Node
+) {
+	const newPosition = {
 		x: initialPosition.x + delta.x,
 		y: initialPosition.y + delta.y
-	});
+	};
+	position.set(newPosition);
+
+	// Dispatch position change event if node is provided
+	if (node && node.id) {
+		// This will be picked up by the parent component
+		if (typeof window !== 'undefined') {
+			const event = new CustomEvent('svelvet:nodePositionChanged', {
+				detail: {
+					nodeId: node.id.slice(2), // Remove 'N-' prefix
+					position: newPosition
+				},
+				bubbles: true
+			});
+			window.dispatchEvent(event);
+		}
+	}
 }
 
 export function moveElementWithBounds(
 	initialPosition: XYPair,
 	delta: XYPair,
 	position: Writable<XYPair>,
-	bounds: { left: number; right: number; top: number; bottom: number }
+	bounds: { left: number; right: number; top: number; bottom: number },
+	node?: Node
 ) {
-	position.set({
+	const newPosition = {
 		x: Math.min(Math.max(bounds.left, initialPosition.x + delta.x), bounds.right),
 		y: Math.min(Math.max(bounds.top, initialPosition.y + delta.y), bounds.bottom)
-	});
+	};
+	position.set(newPosition);
+
+	// Dispatch position change event if node is provided
+	if (node && node.id) {
+		if (typeof window !== 'undefined') {
+			const event = new CustomEvent('svelvet:nodePositionChanged', {
+				detail: {
+					nodeId: node.id.slice(2), // Remove 'N-' prefix
+					position: newPosition
+				},
+				bubbles: true
+			});
+			window.dispatchEvent(event);
+		}
+	}
 }
 
 export function calculateRelativeBounds(groupBox: GroupBox, nodeWidth: number, nodeHeight: number) {
