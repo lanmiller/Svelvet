@@ -9,9 +9,9 @@ export const cell = { width: 200, height: 100 };
  * @returns The new snapped (x, y) position
  */
 export function getSnappedPosition(x, y) {
-    // console.log('Snapping position:', { x, y }); // Debugging line
-    return {
-        x: Math.round(x / cell.width) * cell.width,
-        y: Math.round(y / cell.height) * cell.height
-    };
+	// console.log('Snapping position:', { x, y }); // Debugging line
+	return {
+		x: Math.round(x / cell.width) * cell.width,
+		y: Math.round(y / cell.height) * cell.height
+	};
 }

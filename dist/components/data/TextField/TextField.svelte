@@ -1,6 +1,7 @@
-<script>import { getContext } from "svelte";
-export let placeholder;
-const textStore = getContext("textStore");
+<script>
+	import { getContext } from 'svelte';
+	export let placeholder;
+	const textStore = getContext('textStore');
 </script>
 
 <input

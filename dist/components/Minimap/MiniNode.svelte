@@ -1,32 +1,29 @@
-<script>import { onMount } from "svelte";
-export let node;
-export let hidden = false;
-export let toggleHidden;
-export let top;
-export let left;
-export let nodeColor = null;
-export let hideable;
-const { position, dimensions, bgColor, borderRadius, rotation } = node;
-const { width, height } = dimensions;
-$:
-  nodePosition = $position;
-$:
-  nodeRotation = $rotation;
-$:
-  zIndex = node.zIndex;
-let color = null;
-$:
-  colorIsTransparent = color === "rgba(0, 0, 0, 0)";
-onMount(() => {
-  try {
-    const DOMnode = document.querySelector(`#${node.id}`)?.firstChild;
-    if (DOMnode) {
-      color = window.getComputedStyle(DOMnode).backgroundColor;
-    }
-  } catch (e) {
-    console.error(e);
-  }
-});
+<script>
+	import { onMount } from 'svelte';
+	export let node;
+	export let hidden = false;
+	export let toggleHidden;
+	export let top;
+	export let left;
+	export let nodeColor = null;
+	export let hideable;
+	const { position, dimensions, bgColor, borderRadius, rotation } = node;
+	const { width, height } = dimensions;
+	$: nodePosition = $position;
+	$: nodeRotation = $rotation;
+	$: zIndex = node.zIndex;
+	let color = null;
+	$: colorIsTransparent = color === 'rgba(0, 0, 0, 0)';
+	onMount(() => {
+		try {
+			const DOMnode = document.querySelector(`#${node.id}`)?.firstChild;
+			if (DOMnode) {
+				color = window.getComputedStyle(DOMnode).backgroundColor;
+			}
+		} catch (e) {
+			console.error(e);
+		}
+	});
 </script>
 
 <button

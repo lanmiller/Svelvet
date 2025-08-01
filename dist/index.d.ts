@@ -17,6 +17,31 @@ import Resizer from './components/Resizer/Resizer.svelte';
 import { generateInput, generateOutput } from './utils/creators';
 import { getViewportCenter } from './utils/getters/getViewportCenter';
 import ContrastTheme from './components/ContrastTheme/ContrastTheme.svelte';
-export { calculateSmartStepPath, type OrthogonalEdgeOptions, type SmartStepPathOptions } from './utils/calculators/calculateStepPath';
-export { Svelvet, Controls, Minimap, Node, Anchor, Edge, Background, Group, Resizer, Slider, Toggle, Knob, RadioGroup, ThemeToggle, ColorPicker, Drawer, generateInput, generateOutput, getViewportCenter, ContrastTheme };
+export {
+	calculateSmartStepPath,
+	type OrthogonalEdgeOptions,
+	type SmartStepPathOptions
+} from './utils/calculators/calculateStepPath';
+export {
+	Svelvet,
+	Controls,
+	Minimap,
+	Node,
+	Anchor,
+	Edge,
+	Background,
+	Group,
+	Resizer,
+	Slider,
+	Toggle,
+	Knob,
+	RadioGroup,
+	ThemeToggle,
+	ColorPicker,
+	Drawer,
+	generateInput,
+	generateOutput,
+	getViewportCenter,
+	ContrastTheme
+};
 export * from './types';

@@ -1,67 +1,67 @@
-<script context="module">import { addProps } from "../../utils";
-let edgeWidth;
-let color;
-let straight;
-let step;
-let cornerRadius;
-let animate;
-let edgeLabel;
-let labelColor;
-let textColor;
-let targetColor;
-export function createEdgeProps() {
-  const edgeProps = {};
-  const edgePropsNames = [
-    "width",
-    "targetColor",
-    "color",
-    "straight",
-    "step",
-    "cornerRadius",
-    "animate",
-    "label",
-    "labelColor",
-    "textColor"
-  ];
-  const edgePropsArray = [
-    edgeWidth,
-    targetColor,
-    color,
-    straight,
-    step,
-    cornerRadius,
-    animate,
-    edgeLabel,
-    labelColor,
-    textColor
-  ];
-  addProps(edgePropsNames, edgePropsArray, edgeProps);
-  if (Object.keys(edgeProps).length)
-    return edgeProps;
-  return;
-}
-const handleStepButtonClick = (e) => {
-  const target = e.target;
-  step = target.checked;
-};
-const handleAnimateButtonClick = (e) => {
-  const target = e.target;
-  animate = target.checked;
-};
-const handleEdgeResetButtonClick = (e) => {
-  edgeWidth = void 0;
-  targetColor = void 0;
-  color = void 0;
-  straight = void 0;
-  step = void 0;
-  cornerRadius = void 0;
-  animate = void 0;
-  edgeLabel = void 0;
-  labelColor = void 0;
-  textColor = void 0;
-  const target = e.target;
-  target.reset();
-};
+<script context="module">
+	import { addProps } from '../../utils';
+	let edgeWidth;
+	let color;
+	let straight;
+	let step;
+	let cornerRadius;
+	let animate;
+	let edgeLabel;
+	let labelColor;
+	let textColor;
+	let targetColor;
+	export function createEdgeProps() {
+		const edgeProps = {};
+		const edgePropsNames = [
+			'width',
+			'targetColor',
+			'color',
+			'straight',
+			'step',
+			'cornerRadius',
+			'animate',
+			'label',
+			'labelColor',
+			'textColor'
+		];
+		const edgePropsArray = [
+			edgeWidth,
+			targetColor,
+			color,
+			straight,
+			step,
+			cornerRadius,
+			animate,
+			edgeLabel,
+			labelColor,
+			textColor
+		];
+		addProps(edgePropsNames, edgePropsArray, edgeProps);
+		if (Object.keys(edgeProps).length) return edgeProps;
+		return;
+	}
+	const handleStepButtonClick = (e) => {
+		const target = e.target;
+		step = target.checked;
+	};
+	const handleAnimateButtonClick = (e) => {
+		const target = e.target;
+		animate = target.checked;
+	};
+	const handleEdgeResetButtonClick = (e) => {
+		edgeWidth = void 0;
+		targetColor = void 0;
+		color = void 0;
+		straight = void 0;
+		step = void 0;
+		cornerRadius = void 0;
+		animate = void 0;
+		edgeLabel = void 0;
+		labelColor = void 0;
+		textColor = void 0;
+		const target = e.target;
+		target.reset();
+	};
 </script>
 
 <div id="edgeContainer">

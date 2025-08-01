@@ -1,64 +1,65 @@
-<script>console.log("Componente ThemeToggle.svelte");
-import { getJSONState } from "../../utils/savers/saveStore";
-import { onMount } from "svelte";
-import { graphStore } from "../../stores";
-import { get } from "svelte/store";
-export let main = "light";
-export let alt = "dark";
-export let mainIcon = "light_mode";
-export let altIcon = "dark_mode";
-export let corner = "NE";
-export let bgColor = null;
-export let iconColor = null;
-let current = main;
-function toggleTheme() {
-  const currentTheme = document.documentElement.getAttribute("svelvet-theme");
-  let newTheme;
-  if (!currentTheme || currentTheme === main) {
-    newTheme = alt;
-  } else {
-    newTheme = main;
-  }
-  current = newTheme;
-  document.documentElement.setAttribute("svelvet-theme", newTheme);
-  localStorage.setItem("currentTheme", newTheme);
-}
-onMount(() => {
-  const savedTheme = localStorage.getItem("currentTheme");
-  if (savedTheme) {
-    document.documentElement.setAttribute("svelvet-theme", savedTheme);
-    current = savedTheme;
-  } else {
-    document.documentElement.setAttribute("svelvet-theme", main);
-    current = main;
-  }
-  const savedGraphState = localStorage.getItem("state");
-  if (savedGraphState) {
-    console.log("Al renderizar la aplicacion este componente se ejecuta en este orden");
-    const parsedGraphState = JSON.parse(savedGraphState);
-    if (parsedGraphState && parsedGraphState.nodes) {
-      const graph2 = get(graphStore);
-      console.log(graph2);
-      graph2.set("G-1", parsedGraphState);
-      console.log("Restaurando nodos:", parsedGraphState.nodes);
-    }
-  }
-});
-let graph;
-graphStore.subscribe((graphMap) => {
-  const graphKey = "G-1";
-  graph = graphMap.get(graphKey);
-  console.log("Graph from store:", graph);
-});
-function logCurrentGraphState() {
-  const currentGraphMap = get(graphStore);
-  const graph2 = currentGraphMap.get("G-1");
-}
-function handleSaveButton() {
-  const graphState = get(graphStore).get("G-1");
-  const jsonState = getJSONState(graphState);
-  console.log("Estado de los nodos guardado:", jsonState);
-}
+<script>
+	console.log('Componente ThemeToggle.svelte');
+	import { getJSONState } from '../../utils/savers/saveStore';
+	import { onMount } from 'svelte';
+	import { graphStore } from '../../stores';
+	import { get } from 'svelte/store';
+	export let main = 'light';
+	export let alt = 'dark';
+	export let mainIcon = 'light_mode';
+	export let altIcon = 'dark_mode';
+	export let corner = 'NE';
+	export let bgColor = null;
+	export let iconColor = null;
+	let current = main;
+	function toggleTheme() {
+		const currentTheme = document.documentElement.getAttribute('svelvet-theme');
+		let newTheme;
+		if (!currentTheme || currentTheme === main) {
+			newTheme = alt;
+		} else {
+			newTheme = main;
+		}
+		current = newTheme;
+		document.documentElement.setAttribute('svelvet-theme', newTheme);
+		localStorage.setItem('currentTheme', newTheme);
+	}
+	onMount(() => {
+		const savedTheme = localStorage.getItem('currentTheme');
+		if (savedTheme) {
+			document.documentElement.setAttribute('svelvet-theme', savedTheme);
+			current = savedTheme;
+		} else {
+			document.documentElement.setAttribute('svelvet-theme', main);
+			current = main;
+		}
+		const savedGraphState = localStorage.getItem('state');
+		if (savedGraphState) {
+			console.log('Al renderizar la aplicacion este componente se ejecuta en este orden');
+			const parsedGraphState = JSON.parse(savedGraphState);
+			if (parsedGraphState && parsedGraphState.nodes) {
+				const graph2 = get(graphStore);
+				console.log(graph2);
+				graph2.set('G-1', parsedGraphState);
+				console.log('Restaurando nodos:', parsedGraphState.nodes);
+			}
+		}
+	});
+	let graph;
+	graphStore.subscribe((graphMap) => {
+		const graphKey = 'G-1';
+		graph = graphMap.get(graphKey);
+		console.log('Graph from store:', graph);
+	});
+	function logCurrentGraphState() {
+		const currentGraphMap = get(graphStore);
+		const graph2 = currentGraphMap.get('G-1');
+	}
+	function handleSaveButton() {
+		const graphState = get(graphStore).get('G-1');
+		const jsonState = getJSONState(graphState);
+		console.log('Estado de los nodos guardado:', jsonState);
+	}
 </script>
 
 <div

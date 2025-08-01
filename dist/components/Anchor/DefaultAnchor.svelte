@@ -1,9 +1,10 @@
-<script>export let output;
-export let input;
-export let connecting;
-export let connected;
-export let hovering;
-export let bgColor;
+<script>
+	export let output;
+	export let input;
+	export let connecting;
+	export let connected;
+	export let hovering;
+	export let bgColor;
 </script>
 
 <!-- //<div
