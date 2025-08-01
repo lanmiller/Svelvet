@@ -1,25 +1,23 @@
-<script context="module">
-	import Resizer from '../Resizer/Resizer.svelte';
-	import Anchor from '../Anchor/Anchor.svelte';
-	import { get } from 'svelte/store';
-	import { getContext } from 'svelte';
+<script context="module">import Resizer from "../Resizer/Resizer.svelte";
+import Anchor from "../Anchor/Anchor.svelte";
+import { get } from "svelte/store";
+import { getContext } from "svelte";
 </script>
 
-<script>
-	const dynamic = getContext('dynamic');
-	const node = getContext('node');
-	export let selected;
-	const label = node.label;
-	const borderRadius = node.borderRadius;
-	const textColor = node.textColor;
-	const inputs = node.inputs;
-	const outputs = node.outputs;
-	const resizable = node.resizable;
-	const direction = get(node.direction);
-	let top = direction === 'TD' ? true : false;
-	let bottom = direction === 'TD' ? true : false;
-	let left = direction === 'TD' ? false : true;
-	let right = direction === 'TD' ? false : true;
+<script>const dynamic = getContext("dynamic");
+const node = getContext("node");
+export let selected;
+const label = node.label;
+const borderRadius = node.borderRadius;
+const textColor = node.textColor;
+const inputs = node.inputs;
+const outputs = node.outputs;
+const resizable = node.resizable;
+const direction = get(node.direction);
+let top = direction === "TD" ? true : false;
+let bottom = direction === "TD" ? true : false;
+let left = direction === "TD" ? false : true;
+let right = direction === "TD" ? false : true;
 </script>
 
 <div class:selected class="default-node" style:border-radius="{$borderRadius}px">

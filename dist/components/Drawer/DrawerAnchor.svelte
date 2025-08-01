@@ -1,169 +1,180 @@
-<script context="module">
-	import { writable } from 'svelte/store';
-	import { addProps } from '../../utils';
-	import Icon from '../../assets/icons/Icon.svelte';
-	const leftAnchorCounter = writable(0);
-	const rightAnchorCounter = writable(0);
-	const topAnchorCounter = writable(0);
-	const bottomAnchorCounter = writable(0);
-	const selfAnchorCounter = writable(0);
-	let invisible;
-	let nodeConnect;
-	let input;
-	let output;
-	let multiple;
-	let direction;
-	let dynamic;
-	let anchorEdgeLabel;
-	let anchorLocked;
-	let anchorBgColor;
-	let directionValue;
-	let edgeProps = void 0;
-	let anchorsCreated = {
-		self: [],
-		left: [],
-		right: [],
-		top: [],
-		bottom: []
-	};
-	export const createAnchorProps = (createAnchors, anchorPosition) => {
-		if (direction == '') direction = void 0;
-		const anchorProps = {};
-		const anchorPropNames = [
-			'invisible',
-			'nodeConnect',
-			'input',
-			'output',
-			'multiple',
-			'direction',
-			'dynamic',
-			'edgeLabel',
-			'locked',
-			'bgColor',
-			'edge'
-		];
-		const anchorPropsArray = [
-			invisible,
-			nodeConnect,
-			input,
-			output,
-			multiple,
-			direction,
-			dynamic,
-			anchorEdgeLabel,
-			anchorLocked,
-			anchorBgColor,
-			edgeProps
-		];
-		addProps(anchorPropNames, anchorPropsArray, anchorProps);
-		if (Object.keys(anchorProps).length) {
-			if (createAnchors) {
-				return {
-					self: [...anchorsCreated.self],
-					left: [...anchorsCreated.left],
-					right: [...anchorsCreated.right],
-					top: [...anchorsCreated.top],
-					bottom: [...anchorsCreated.bottom]
-				};
-			}
-			if (anchorPosition === 'addLeftAnchor') anchorsCreated.left.push(anchorProps);
-			else if (anchorPosition === 'addRightAnchor') anchorsCreated.right.push(anchorProps);
-			else if (anchorPosition === 'addTopAnchor') anchorsCreated.top.push(anchorProps);
-			else if (anchorPosition === 'addBottomAnchor') anchorsCreated.bottom.push(anchorProps);
-			else if (anchorPosition === 'addSelfAnchor') anchorsCreated.self.push(anchorProps);
-		}
-		return;
-	};
-	const handleAnchorLockedButtonClick = (e) => {
-		const target = e.target;
-		anchorLocked = target.checked;
-	};
-	const handleInvisibleButtonClick = (e) => {
-		const target = e.target;
-		invisible = target.checked;
-	};
-	const handleNodeConnectButtonClick = (e) => {
-		const target = e.target;
-		nodeConnect = target.checked;
-	};
-	const handleInputButtonClick = (e) => {
-		const target = e.target;
-		input = target.checked;
-	};
-	const handleOutputButtonClick = (e) => {
-		const target = e.target;
-		output = target.checked;
-	};
-	const handleMultipleButtonClick = (e) => {
-		const target = e.target;
-		multiple = target.checked;
-	};
-	const handleDynamicButtonClick = (e) => {
-		const target = e.target;
-		dynamic = target.checked;
-	};
-	const handleDirectionButtonClick = (e) => {
-		const target = e.target;
-		if (target.value == '') direction = void 0;
-		else {
-			direction = target.value;
-		}
-	};
-	const handleAnchorResetButtonClick = (e) => {
-		invisible = void 0;
-		nodeConnect = void 0;
-		input = void 0;
-		output = void 0;
-		multiple = void 0;
-		direction = void 0;
-		dynamic = void 0;
-		anchorEdgeLabel = void 0;
-		anchorLocked = void 0;
-		anchorBgColor = void 0;
-		anchorsCreated.left = [];
-		anchorsCreated.right = [];
-		anchorsCreated.top = [];
-		anchorsCreated.bottom = [];
-		anchorsCreated.self = [];
-		selfAnchorCounter.set(0);
-		leftAnchorCounter.set(0);
-		rightAnchorCounter.set(0);
-		topAnchorCounter.set(0);
-		bottomAnchorCounter.set(0);
-		const formElement = e.target;
-		if (e) formElement.reset();
-	};
-	const addAnchor = (e) => {
-		const formEvent = e.target;
-		const addAnchorID = formEvent?.parentElement?.id || formEvent?.id;
-		createAnchorProps(false, addAnchorID);
-		if (addAnchorID === 'addLeftAnchor') leftAnchorCounter.set(anchorsCreated.left.length);
-		else if (addAnchorID === 'addRightAnchor') rightAnchorCounter.set(anchorsCreated.right.length);
-		else if (addAnchorID === 'addTopAnchor') topAnchorCounter.set(anchorsCreated.top.length);
-		else if (addAnchorID === 'addBottomAnchor')
-			bottomAnchorCounter.set(anchorsCreated.bottom.length);
-		else if (addAnchorID === 'addSelfAnchor') selfAnchorCounter.set(anchorsCreated.self.length);
-	};
-	const deleteAnchor = (e) => {
-		const formEvent = e.target;
-		const deleteAnchorID = formEvent?.parentElement?.id || formEvent?.id;
-		if (deleteAnchorID === 'deleteLeftAnchor') {
-			anchorsCreated.left.pop();
-			leftAnchorCounter.set(anchorsCreated.left.length);
-		} else if (deleteAnchorID === 'deleteRightAnchor') {
-			anchorsCreated.right.pop();
-			rightAnchorCounter.set(anchorsCreated.right.length);
-		} else if (deleteAnchorID === 'deleteTopAnchor') {
-			anchorsCreated.top.pop();
-			topAnchorCounter.set(anchorsCreated.top.length);
-		} else if (deleteAnchorID === 'deleteBottomAnchor') {
-			anchorsCreated.bottom.pop();
-			bottomAnchorCounter.set(anchorsCreated.bottom.length);
-		} else if (deleteAnchorID === 'deleteSelfAnchor') {
-			anchorsCreated.self.pop();
-			selfAnchorCounter.set(anchorsCreated.self.length);
-		}
-	};
+<script context="module">import { writable } from "svelte/store";
+import { addProps } from "../../utils";
+import Icon from "../../assets/icons/Icon.svelte";
+const leftAnchorCounter = writable(0);
+const rightAnchorCounter = writable(0);
+const topAnchorCounter = writable(0);
+const bottomAnchorCounter = writable(0);
+const selfAnchorCounter = writable(0);
+let invisible;
+let nodeConnect;
+let input;
+let output;
+let multiple;
+let direction;
+let dynamic;
+let anchorEdgeLabel;
+let anchorLocked;
+let anchorBgColor;
+let directionValue;
+let edgeProps = void 0;
+let anchorsCreated = {
+  self: [],
+  left: [],
+  right: [],
+  top: [],
+  bottom: []
+};
+export const createAnchorProps = (createAnchors, anchorPosition) => {
+  if (direction == "")
+    direction = void 0;
+  const anchorProps = {};
+  const anchorPropNames = [
+    "invisible",
+    "nodeConnect",
+    "input",
+    "output",
+    "multiple",
+    "direction",
+    "dynamic",
+    "edgeLabel",
+    "locked",
+    "bgColor",
+    "edge"
+  ];
+  const anchorPropsArray = [
+    invisible,
+    nodeConnect,
+    input,
+    output,
+    multiple,
+    direction,
+    dynamic,
+    anchorEdgeLabel,
+    anchorLocked,
+    anchorBgColor,
+    edgeProps
+  ];
+  addProps(anchorPropNames, anchorPropsArray, anchorProps);
+  if (Object.keys(anchorProps).length) {
+    if (createAnchors) {
+      return {
+        self: [...anchorsCreated.self],
+        left: [...anchorsCreated.left],
+        right: [...anchorsCreated.right],
+        top: [...anchorsCreated.top],
+        bottom: [...anchorsCreated.bottom]
+      };
+    }
+    if (anchorPosition === "addLeftAnchor")
+      anchorsCreated.left.push(anchorProps);
+    else if (anchorPosition === "addRightAnchor")
+      anchorsCreated.right.push(anchorProps);
+    else if (anchorPosition === "addTopAnchor")
+      anchorsCreated.top.push(anchorProps);
+    else if (anchorPosition === "addBottomAnchor")
+      anchorsCreated.bottom.push(anchorProps);
+    else if (anchorPosition === "addSelfAnchor")
+      anchorsCreated.self.push(anchorProps);
+  }
+  return;
+};
+const handleAnchorLockedButtonClick = (e) => {
+  const target = e.target;
+  anchorLocked = target.checked;
+};
+const handleInvisibleButtonClick = (e) => {
+  const target = e.target;
+  invisible = target.checked;
+};
+const handleNodeConnectButtonClick = (e) => {
+  const target = e.target;
+  nodeConnect = target.checked;
+};
+const handleInputButtonClick = (e) => {
+  const target = e.target;
+  input = target.checked;
+};
+const handleOutputButtonClick = (e) => {
+  const target = e.target;
+  output = target.checked;
+};
+const handleMultipleButtonClick = (e) => {
+  const target = e.target;
+  multiple = target.checked;
+};
+const handleDynamicButtonClick = (e) => {
+  const target = e.target;
+  dynamic = target.checked;
+};
+const handleDirectionButtonClick = (e) => {
+  const target = e.target;
+  if (target.value == "")
+    direction = void 0;
+  else {
+    direction = target.value;
+  }
+};
+const handleAnchorResetButtonClick = (e) => {
+  invisible = void 0;
+  nodeConnect = void 0;
+  input = void 0;
+  output = void 0;
+  multiple = void 0;
+  direction = void 0;
+  dynamic = void 0;
+  anchorEdgeLabel = void 0;
+  anchorLocked = void 0;
+  anchorBgColor = void 0;
+  anchorsCreated.left = [];
+  anchorsCreated.right = [];
+  anchorsCreated.top = [];
+  anchorsCreated.bottom = [];
+  anchorsCreated.self = [];
+  selfAnchorCounter.set(0);
+  leftAnchorCounter.set(0);
+  rightAnchorCounter.set(0);
+  topAnchorCounter.set(0);
+  bottomAnchorCounter.set(0);
+  const formElement = e.target;
+  if (e)
+    formElement.reset();
+};
+const addAnchor = (e) => {
+  const formEvent = e.target;
+  const addAnchorID = formEvent?.parentElement?.id || formEvent?.id;
+  createAnchorProps(false, addAnchorID);
+  if (addAnchorID === "addLeftAnchor")
+    leftAnchorCounter.set(anchorsCreated.left.length);
+  else if (addAnchorID === "addRightAnchor")
+    rightAnchorCounter.set(anchorsCreated.right.length);
+  else if (addAnchorID === "addTopAnchor")
+    topAnchorCounter.set(anchorsCreated.top.length);
+  else if (addAnchorID === "addBottomAnchor")
+    bottomAnchorCounter.set(anchorsCreated.bottom.length);
+  else if (addAnchorID === "addSelfAnchor")
+    selfAnchorCounter.set(anchorsCreated.self.length);
+};
+const deleteAnchor = (e) => {
+  const formEvent = e.target;
+  const deleteAnchorID = formEvent?.parentElement?.id || formEvent?.id;
+  if (deleteAnchorID === "deleteLeftAnchor") {
+    anchorsCreated.left.pop();
+    leftAnchorCounter.set(anchorsCreated.left.length);
+  } else if (deleteAnchorID === "deleteRightAnchor") {
+    anchorsCreated.right.pop();
+    rightAnchorCounter.set(anchorsCreated.right.length);
+  } else if (deleteAnchorID === "deleteTopAnchor") {
+    anchorsCreated.top.pop();
+    topAnchorCounter.set(anchorsCreated.top.length);
+  } else if (deleteAnchorID === "deleteBottomAnchor") {
+    anchorsCreated.bottom.pop();
+    bottomAnchorCounter.set(anchorsCreated.bottom.length);
+  } else if (deleteAnchorID === "deleteSelfAnchor") {
+    anchorsCreated.self.pop();
+    selfAnchorCounter.set(anchorsCreated.self.length);
+  }
+};
 </script>
 
 <div id="anchorContainer">

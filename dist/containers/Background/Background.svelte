@@ -1,39 +1,42 @@
-<script>
-	import { DOT_WIDTH, GRID_SCALE } from '../../constants';
-	import { getContext } from 'svelte';
-	const graph = getContext('graph');
-	export let style = 'dots';
-	export let gridWidth = GRID_SCALE;
-	export let dotSize = DOT_WIDTH;
-	export let bgColor = null;
-	export let dotColor = null;
-	export let opacityThreshold = 3;
-	export let majorGrid = 0;
-	export let minOpacity = 0.4;
-	const transforms = graph.transforms;
-	const scaleStore = transforms.scale;
-	const translationStore = transforms.translation;
-	let backgroundWrapper;
-	let svgWidth;
-	let svgHeight;
-	let backgroundOffsetX;
-	let backgroundOffsetY;
-	let gridOpacity = 1;
-	let majorGridOpacity = 1;
-	$: graphTranslation = $translationStore;
-	$: scale = $scaleStore;
-	$: gridScale = scale * gridWidth;
-	$: radius = (scale * dotSize) / 2;
-	$: dotCenterCoordinate = gridScale / 2;
-	$: {
-		svgWidth = backgroundWrapper?.offsetWidth || 0;
-		svgHeight = backgroundWrapper?.offsetHeight || 0;
-		backgroundOffsetX = ((svgWidth + radius) * (1 - scale)) / 2 + graphTranslation.x;
-		backgroundOffsetY = ((svgHeight + radius) * (1 - scale)) / 2 + graphTranslation.y;
-		gridOpacity = scale > opacityThreshold ? 1 : scale / opacityThreshold + minOpacity;
-		majorGridOpacity =
-			scale > opacityThreshold / 3 ? 1 : scale / (opacityThreshold / 3) + minOpacity;
-	}
+<script>import { DOT_WIDTH, GRID_SCALE } from "../../constants";
+import { getContext } from "svelte";
+const graph = getContext("graph");
+export let style = "dots";
+export let gridWidth = GRID_SCALE;
+export let dotSize = DOT_WIDTH;
+export let bgColor = null;
+export let dotColor = null;
+export let opacityThreshold = 3;
+export let majorGrid = 0;
+export let minOpacity = 0.4;
+const transforms = graph.transforms;
+const scaleStore = transforms.scale;
+const translationStore = transforms.translation;
+let backgroundWrapper;
+let svgWidth;
+let svgHeight;
+let backgroundOffsetX;
+let backgroundOffsetY;
+let gridOpacity = 1;
+let majorGridOpacity = 1;
+$:
+  graphTranslation = $translationStore;
+$:
+  scale = $scaleStore;
+$:
+  gridScale = scale * gridWidth;
+$:
+  radius = scale * dotSize / 2;
+$:
+  dotCenterCoordinate = gridScale / 2;
+$: {
+  svgWidth = backgroundWrapper?.offsetWidth || 0;
+  svgHeight = backgroundWrapper?.offsetHeight || 0;
+  backgroundOffsetX = (svgWidth + radius) * (1 - scale) / 2 + graphTranslation.x;
+  backgroundOffsetY = (svgHeight + radius) * (1 - scale) / 2 + graphTranslation.y;
+  gridOpacity = scale > opacityThreshold ? 1 : scale / opacityThreshold + minOpacity;
+  majorGridOpacity = scale > opacityThreshold / 3 ? 1 : scale / (opacityThreshold / 3) + minOpacity;
+}
 </script>
 
 <!-- BACKGROUND COMPONENT START -->

@@ -1,15 +1,15 @@
-<script>
-	import { createEventDispatcher } from 'svelte';
-	export let dimensions;
-	export let position;
-	export let color;
-	export let groupName;
-	const { width, height } = dimensions;
-	$: id = `${groupName}-bounding-box`;
-	const dispatch = createEventDispatcher();
-	function dispatchClick() {
-		dispatch('groupClick', { groupName });
-	}
+<script>import { createEventDispatcher } from "svelte";
+export let dimensions;
+export let position;
+export let color;
+export let groupName;
+const { width, height } = dimensions;
+$:
+  id = `${groupName}-bounding-box`;
+const dispatch = createEventDispatcher();
+function dispatchClick() {
+  dispatch("groupClick", { groupName });
+}
 </script>
 
 <div

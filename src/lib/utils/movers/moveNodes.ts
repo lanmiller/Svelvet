@@ -107,7 +107,13 @@ export function moveNodes(graph: Graph, snapTo: number) {
 				const nodeWidth = get(node.dimensions.width);
 				const nodeHeight = get(node.dimensions.height);
 				const bounds = calculateRelativeBounds(groupBox, nodeWidth, nodeHeight);
-				moveElementWithBounds(initialPosition, delta, position, bounds, 'id' in node ? node : undefined);
+				moveElementWithBounds(
+					initialPosition,
+					delta,
+					position,
+					bounds,
+					'id' in node ? node : undefined
+				);
 			}
 		});
 

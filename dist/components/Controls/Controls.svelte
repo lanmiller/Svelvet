@@ -1,42 +1,41 @@
-<script>
-	import { getContext } from 'svelte';
-	import { get } from 'svelte/store';
-	import { calculateFitView } from '../../utils';
-	import { zoomAndTranslate } from '../../utils/movers';
-	import { tracking } from '../../stores';
-	import Icon from '../../assets/icons/Icon.svelte';
-	export let increment = 0.1;
-	export let horizontal = false;
-	export let bgColor = null;
-	export let iconColor = null;
-	export let corner = 'SW';
-	const transforms = getContext('transforms');
-	const dimensions = getContext('dimensions');
-	const locked = getContext('locked');
-	const groups = getContext('groups');
-	const bounds = getContext('bounds');
-	const { translation } = transforms;
-	const hidden = $groups.hidden.nodes;
-	const nodeBounds = bounds.nodeBounds;
-	function unhideAll() {
-		hidden.set(/* @__PURE__ */ new Set());
-	}
-	function zoomIn() {
-		zoomAndTranslate(-1, dimensions, transforms, increment);
-	}
-	function zoomOut() {
-		zoomAndTranslate(1, dimensions, transforms, increment);
-	}
-	function fitView() {
-		tracking.set(true);
-		const { x, y, scale } = calculateFitView(get(dimensions), get(nodeBounds));
-		translation.set({ x: x || 0, y: y || 0 });
-		transforms.scale.set(scale || 1);
-		tracking.set(false);
-	}
-	function lock() {
-		locked.set(!$locked);
-	}
+<script>import { getContext } from "svelte";
+import { get } from "svelte/store";
+import { calculateFitView } from "../../utils";
+import { zoomAndTranslate } from "../../utils/movers";
+import { tracking } from "../../stores";
+import Icon from "../../assets/icons/Icon.svelte";
+export let increment = 0.1;
+export let horizontal = false;
+export let bgColor = null;
+export let iconColor = null;
+export let corner = "SW";
+const transforms = getContext("transforms");
+const dimensions = getContext("dimensions");
+const locked = getContext("locked");
+const groups = getContext("groups");
+const bounds = getContext("bounds");
+const { translation } = transforms;
+const hidden = $groups.hidden.nodes;
+const nodeBounds = bounds.nodeBounds;
+function unhideAll() {
+  hidden.set(/* @__PURE__ */ new Set());
+}
+function zoomIn() {
+  zoomAndTranslate(-1, dimensions, transforms, increment);
+}
+function zoomOut() {
+  zoomAndTranslate(1, dimensions, transforms, increment);
+}
+function fitView() {
+  tracking.set(true);
+  const { x, y, scale } = calculateFitView(get(dimensions), get(nodeBounds));
+  translation.set({ x: x || 0, y: y || 0 });
+  transforms.scale.set(scale || 1);
+  tracking.set(false);
+}
+function lock() {
+  locked.set(!$locked);
+}
 </script>
 
 <nav class="graph-controls {corner}" aria-label="navigation">

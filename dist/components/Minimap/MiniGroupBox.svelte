@@ -1,11 +1,10 @@
-<script>
-	export let dimensions;
-	export let position;
-	export let color;
-	export let groupName;
-	export let top;
-	export let left;
-	const { width, height } = dimensions;
+<script>export let dimensions;
+export let position;
+export let color;
+export let groupName;
+export let top;
+export let left;
+const { width, height } = dimensions;
 </script>
 
 <div

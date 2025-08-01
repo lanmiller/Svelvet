@@ -1,16 +1,15 @@
-<script>
-	export let parameterStore;
-	export let color = 'limegreen';
-	const handleKeyToggle = (event) => {
-		event.stopPropagation();
-		if (event.key === 'Enter') {
-			$parameterStore = !$parameterStore;
-		}
-	};
-	const handleClickToggle = (event) => {
-		event.stopPropagation();
-		$parameterStore = !$parameterStore;
-	};
+<script>export let parameterStore;
+export let color = "limegreen";
+const handleKeyToggle = (event) => {
+  event.stopPropagation();
+  if (event.key === "Enter") {
+    $parameterStore = !$parameterStore;
+  }
+};
+const handleClickToggle = (event) => {
+  event.stopPropagation();
+  $parameterStore = !$parameterStore;
+};
 </script>
 
 <div

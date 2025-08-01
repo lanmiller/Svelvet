@@ -1,161 +1,157 @@
-<script>
-	import DrawerNode from './DrawerNode.svelte';
-	import DrawerAnchor from './DrawerAnchor.svelte';
-	import DrawerEdge from './DrawerEdge.svelte';
-	import { createNodeProps } from './DrawerNode.svelte';
-	import { createAnchorProps } from './DrawerAnchor.svelte';
-	import { createEdgeProps } from './DrawerEdge.svelte';
-	import Icon from '../../assets/icons/Icon.svelte';
-	import { onMount, onDestroy } from 'svelte';
-	let isOpen = false;
-	let nodeContainerOpen = false;
-	let edgeContainerOpen = false;
-	let anchorContainerOpen = false;
-	let nav;
-	let drawerBtn;
-	let nodeBtn;
-	let edgeBtn;
-	let anchorBtn;
-	let drawerContents;
-	let nodeContainer;
-	let anchorContainer;
-	let edgeContainer;
-	let newNode;
-	const handleDragStart = (e) => {
-		if (!e.dataTransfer) return;
-		e.dataTransfer.dropEffect = 'move';
-		const anchorProps = createAnchorProps(true);
-		const edgeCreated = createEdgeProps();
-		newNode = createNodeProps(edgeCreated, anchorProps);
-		e.dataTransfer.setData('application/json', JSON.stringify(newNode));
-	};
-	const handleDrawer = () => {
-		if (!isOpen) {
-			isOpen = true;
-			nav.style.height = 'fit-content';
-			nav.style.width = '300px';
-		} else {
-			isOpen = false;
-			nav.style.height = '35px';
-			nav.style.width = '35px';
-			anchorContainerOpen = false;
-			edgeContainerOpen = false;
-			nodeContainerOpen = false;
-			nodeContainer.style.display = 'block';
-			edgeContainer.style.display = 'none';
-			anchorContainer.style.display = 'none';
-			nodeBtn.style.borderBottom =
-				'3px solid var(--prop-drawer-button-text-color,var(--drawer-button-text-color, var(--default-drawer-button-text-color)))';
-			edgeBtn.style.borderBottom = 'none';
-			anchorBtn.style.borderBottom = 'none';
-		}
-	};
-	const handleNodeContainer = () => {
-		if (!nodeContainerOpen) {
-			nodeContainerOpen = true;
-			anchorContainerOpen = false;
-			edgeContainerOpen = false;
-			nodeContainer.style.display = 'block';
-			edgeContainer.style.display = 'none';
-			anchorContainer.style.display = 'none';
-			nodeBtn.style.borderBottom =
-				'3px solid var(--prop-drawer-button-text-color,var(--drawer-button-text-color, var(--default-drawer-button-text-color)))';
-			edgeBtn.style.borderBottom = 'none';
-			anchorBtn.style.borderBottom = 'none';
-		}
-	};
-	const handleAnchorContainer = () => {
-		if (!anchorContainerOpen) {
-			anchorContainerOpen = true;
-			edgeContainerOpen = false;
-			nodeContainerOpen = false;
-			anchorContainer.style.display = 'block';
-			edgeContainer.style.display = 'none';
-			nodeContainer.style.display = 'none';
-			nodeBtn.style.borderBottom = 'none';
-			edgeBtn.style.borderBottom = 'none';
-			anchorBtn.style.borderBottom =
-				'3px solid var(--prop-drawer-button-text-color,var(--drawer-button-text-color, var(--default-drawer-button-text-color)))';
-		}
-	};
-	const handleEdgeContainer = () => {
-		if (!edgeContainerOpen) {
-			edgeContainerOpen = true;
-			nodeContainerOpen = false;
-			anchorContainerOpen = false;
-			edgeContainer.style.display = 'block';
-			anchorContainer.style.display = 'none';
-			nodeContainer.style.display = 'none';
-			nodeBtn.style.borderBottom = 'none';
-			edgeBtn.style.borderBottom =
-				'3px solid var(--prop-drawer-button-text-color,var(--drawer-button-text-color, var(--default-drawer-button-text-color)))';
-			anchorBtn.style.borderBottom = 'none';
-		}
-	};
-	let currentComponent = 'Node';
-	const handleKeyPress = (e) => {
-		if (e.key === 'D') {
-			handleDrawer();
-		} else if (e.key === 'T' && isOpen) {
-			if (currentComponent === 'Node') {
-				handleAnchorContainer();
-				currentComponent = 'Anchor';
-			} else if (currentComponent === 'Anchor') {
-				handleEdgeContainer();
-				currentComponent = 'Edge';
-			} else if (currentComponent === 'Edge') {
-				handleNodeContainer();
-				currentComponent = 'Node';
-			}
-		}
-	};
-	let offsetX = 0;
-	let offsetY = 0;
-	let draggedNodeType = null;
-	const handleNodeDragStart = (e, node, nodeType) => {
-		if (!e.dataTransfer) return;
-		console.log('Dragging Node:', nodeType);
-		e.dataTransfer.dropEffect = 'move';
-		e.dataTransfer.setData('text/plain', nodeType);
-		draggedNodeType = nodeType;
-		currentNode = node;
-	};
-	const handleDragMove = (e) => {
-		if (!currentNode) return;
-		console.log('handleDragMove function called!');
-		console.log('Dragging...', e.clientX, e.clientY);
-		const newX = e.clientX - offsetX;
-		const newY = e.clientY - offsetY;
-		const { x: snappedX, y: snappedY } = getSnappedPosition(newX, newY);
-		console.log('Snapped to:', snappedX, snappedY);
-		if (
-			parseInt(currentNode.style.left, 10) !== snappedX ||
-			parseInt(currentNode.style.top, 10) !== snappedY
-		) {
-			currentNode.style.left = `${snappedX}px`;
-			currentNode.style.top = `${snappedY}px`;
-		}
-	};
-	const handleDragEnd = () => {
-		if (!currentNode) return;
-		const { x: snappedX, y: snappedY } = getSnappedPosition(
-			parseInt(currentNode.style.left, 10),
-			parseInt(currentNode.style.top, 10)
-		);
-		currentNode.style.left = `${snappedX}px`;
-		currentNode.style.top = `${snappedY}px`;
-		currentNode = null;
-	};
-	onMount(() => {
-		window.addEventListener('keydown', handleKeyPress);
-		window.addEventListener('mousemove', handleDragMove);
-		window.addEventListener('mouseup', handleDragEnd);
-	});
-	onDestroy(() => {
-		window.removeEventListener('keydown', handleKeyPress);
-		window.removeEventListener('mousemove', handleDragMove);
-		window.removeEventListener('mouseup', handleDragEnd);
-	});
+<script>import DrawerNode from "./DrawerNode.svelte";
+import DrawerAnchor from "./DrawerAnchor.svelte";
+import DrawerEdge from "./DrawerEdge.svelte";
+import { createNodeProps } from "./DrawerNode.svelte";
+import { createAnchorProps } from "./DrawerAnchor.svelte";
+import { createEdgeProps } from "./DrawerEdge.svelte";
+import Icon from "../../assets/icons/Icon.svelte";
+import { onMount, onDestroy } from "svelte";
+let isOpen = false;
+let nodeContainerOpen = false;
+let edgeContainerOpen = false;
+let anchorContainerOpen = false;
+let nav;
+let drawerBtn;
+let nodeBtn;
+let edgeBtn;
+let anchorBtn;
+let drawerContents;
+let nodeContainer;
+let anchorContainer;
+let edgeContainer;
+let newNode;
+const handleDragStart = (e) => {
+  if (!e.dataTransfer)
+    return;
+  e.dataTransfer.dropEffect = "move";
+  const anchorProps = createAnchorProps(true);
+  const edgeCreated = createEdgeProps();
+  newNode = createNodeProps(edgeCreated, anchorProps);
+  e.dataTransfer.setData("application/json", JSON.stringify(newNode));
+};
+const handleDrawer = () => {
+  if (!isOpen) {
+    isOpen = true;
+    nav.style.height = "fit-content";
+    nav.style.width = "300px";
+  } else {
+    isOpen = false;
+    nav.style.height = "35px";
+    nav.style.width = "35px";
+    anchorContainerOpen = false;
+    edgeContainerOpen = false;
+    nodeContainerOpen = false;
+    nodeContainer.style.display = "block";
+    edgeContainer.style.display = "none";
+    anchorContainer.style.display = "none";
+    nodeBtn.style.borderBottom = "3px solid var(--prop-drawer-button-text-color,var(--drawer-button-text-color, var(--default-drawer-button-text-color)))";
+    edgeBtn.style.borderBottom = "none";
+    anchorBtn.style.borderBottom = "none";
+  }
+};
+const handleNodeContainer = () => {
+  if (!nodeContainerOpen) {
+    nodeContainerOpen = true;
+    anchorContainerOpen = false;
+    edgeContainerOpen = false;
+    nodeContainer.style.display = "block";
+    edgeContainer.style.display = "none";
+    anchorContainer.style.display = "none";
+    nodeBtn.style.borderBottom = "3px solid var(--prop-drawer-button-text-color,var(--drawer-button-text-color, var(--default-drawer-button-text-color)))";
+    edgeBtn.style.borderBottom = "none";
+    anchorBtn.style.borderBottom = "none";
+  }
+};
+const handleAnchorContainer = () => {
+  if (!anchorContainerOpen) {
+    anchorContainerOpen = true;
+    edgeContainerOpen = false;
+    nodeContainerOpen = false;
+    anchorContainer.style.display = "block";
+    edgeContainer.style.display = "none";
+    nodeContainer.style.display = "none";
+    nodeBtn.style.borderBottom = "none";
+    edgeBtn.style.borderBottom = "none";
+    anchorBtn.style.borderBottom = "3px solid var(--prop-drawer-button-text-color,var(--drawer-button-text-color, var(--default-drawer-button-text-color)))";
+  }
+};
+const handleEdgeContainer = () => {
+  if (!edgeContainerOpen) {
+    edgeContainerOpen = true;
+    nodeContainerOpen = false;
+    anchorContainerOpen = false;
+    edgeContainer.style.display = "block";
+    anchorContainer.style.display = "none";
+    nodeContainer.style.display = "none";
+    nodeBtn.style.borderBottom = "none";
+    edgeBtn.style.borderBottom = "3px solid var(--prop-drawer-button-text-color,var(--drawer-button-text-color, var(--default-drawer-button-text-color)))";
+    anchorBtn.style.borderBottom = "none";
+  }
+};
+let currentComponent = "Node";
+const handleKeyPress = (e) => {
+  if (e.key === "D") {
+    handleDrawer();
+  } else if (e.key === "T" && isOpen) {
+    if (currentComponent === "Node") {
+      handleAnchorContainer();
+      currentComponent = "Anchor";
+    } else if (currentComponent === "Anchor") {
+      handleEdgeContainer();
+      currentComponent = "Edge";
+    } else if (currentComponent === "Edge") {
+      handleNodeContainer();
+      currentComponent = "Node";
+    }
+  }
+};
+let offsetX = 0;
+let offsetY = 0;
+let draggedNodeType = null;
+const handleNodeDragStart = (e, node, nodeType) => {
+  if (!e.dataTransfer)
+    return;
+  console.log("Dragging Node:", nodeType);
+  e.dataTransfer.dropEffect = "move";
+  e.dataTransfer.setData("text/plain", nodeType);
+  draggedNodeType = nodeType;
+  currentNode = node;
+};
+const handleDragMove = (e) => {
+  if (!currentNode)
+    return;
+  console.log("handleDragMove function called!");
+  console.log("Dragging...", e.clientX, e.clientY);
+  const newX = e.clientX - offsetX;
+  const newY = e.clientY - offsetY;
+  const { x: snappedX, y: snappedY } = getSnappedPosition(newX, newY);
+  console.log("Snapped to:", snappedX, snappedY);
+  if (parseInt(currentNode.style.left, 10) !== snappedX || parseInt(currentNode.style.top, 10) !== snappedY) {
+    currentNode.style.left = `${snappedX}px`;
+    currentNode.style.top = `${snappedY}px`;
+  }
+};
+const handleDragEnd = () => {
+  if (!currentNode)
+    return;
+  const { x: snappedX, y: snappedY } = getSnappedPosition(
+    parseInt(currentNode.style.left, 10),
+    parseInt(currentNode.style.top, 10)
+  );
+  currentNode.style.left = `${snappedX}px`;
+  currentNode.style.top = `${snappedY}px`;
+  currentNode = null;
+};
+onMount(() => {
+  window.addEventListener("keydown", handleKeyPress);
+  window.addEventListener("mousemove", handleDragMove);
+  window.addEventListener("mouseup", handleDragEnd);
+});
+onDestroy(() => {
+  window.removeEventListener("keydown", handleKeyPress);
+  window.removeEventListener("mousemove", handleDragMove);
+  window.removeEventListener("mouseup", handleDragEnd);
+});
 </script>
 
 <nav id="drawerWrapper" bind:this={nav}>

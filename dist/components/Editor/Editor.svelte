@@ -1,50 +1,50 @@
-<script>
-	import Slider from '../data/Slider/Slider.svelte';
-	import TextField from '../data/TextField/TextField.svelte';
-	import { writable } from 'svelte/store';
-	import { Resizer } from '../..';
-	import { getContext, setContext } from 'svelte';
-	import Node from '../Node/Node.svelte';
-	export let editing;
-	const graph = getContext('graph');
-	setContext('graph', graph);
-	setContext('textStore', editing.label);
-	setContext('colorStore', editing.bgColor);
-	let editorPosition = { x: 150, y: 50 };
-	let resizeOptions = { width: 10, height: 10 };
-	$: cursor = graph.cursor;
-	function handleContextMenu(event) {
-		event.preventDefault();
-		editorPosition = { x: event.clientX, y: event.clientY };
-		graph.editing.set(editing);
-	}
-	function deleteNode() {
-		graph.nodes.delete(editing.id);
-		graph.editing.set(null);
-	}
-	function resizeNode() {
-		const nodeId = editing.id;
-		const node = graph.nodes.get(nodeId);
-		if (node) {
-			const currentWidth = node.dimensions.width;
-			const currentHeight = node.dimensions.height;
-			const newWidth = prompt(
-				'Enter new width (for example:250):',
-				currentWidth ? currentWidth.toString() : ''
-			);
-			const newHeight = prompt(
-				'Enter new height (for example:200):',
-				currentHeight ? currentHeight.toString() : ''
-			);
-			if (newWidth === null || newHeight === null) {
-				return;
-			}
-			node.dimensions.width.set(parseInt(newWidth, 10) || 0);
-			node.dimensions.height.set(parseInt(newHeight, 10) || 0);
-			node.resizingWidth.set(true);
-			node.resizingHeight.set(true);
-		}
-	}
+<script>import Slider from "../data/Slider/Slider.svelte";
+import TextField from "../data/TextField/TextField.svelte";
+import { writable } from "svelte/store";
+import { Resizer } from "../..";
+import { getContext, setContext } from "svelte";
+import Node from "../Node/Node.svelte";
+export let editing;
+const graph = getContext("graph");
+setContext("graph", graph);
+setContext("textStore", editing.label);
+setContext("colorStore", editing.bgColor);
+let editorPosition = { x: 150, y: 50 };
+let resizeOptions = { width: 10, height: 10 };
+$:
+  cursor = graph.cursor;
+function handleContextMenu(event) {
+  event.preventDefault();
+  editorPosition = { x: event.clientX, y: event.clientY };
+  graph.editing.set(editing);
+}
+function deleteNode() {
+  graph.nodes.delete(editing.id);
+  graph.editing.set(null);
+}
+function resizeNode() {
+  const nodeId = editing.id;
+  const node = graph.nodes.get(nodeId);
+  if (node) {
+    const currentWidth = node.dimensions.width;
+    const currentHeight = node.dimensions.height;
+    const newWidth = prompt(
+      "Enter new width (for example:250):",
+      currentWidth ? currentWidth.toString() : ""
+    );
+    const newHeight = prompt(
+      "Enter new height (for example:200):",
+      currentHeight ? currentHeight.toString() : ""
+    );
+    if (newWidth === null || newHeight === null) {
+      return;
+    }
+    node.dimensions.width.set(parseInt(newWidth, 10) || 0);
+    node.dimensions.height.set(parseInt(newHeight, 10) || 0);
+    node.resizingWidth.set(true);
+    node.resizingHeight.set(true);
+  }
+}
 </script>
 
 <Node zIndex={Infinity} position={editorPosition} bgColor="white" id="editor">

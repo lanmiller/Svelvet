@@ -1,180 +1,189 @@
-<script context="module">
-	import { initialClickPosition, tracking } from '../../stores';
-	import { captureGroup } from '../../utils';
-	import { getContext, onDestroy, onMount, setContext } from 'svelte';
-	import { createEventDispatcher } from 'svelte';
-	import { get, writable } from 'svelte/store';
-	const tagsToIgnore = /* @__PURE__ */ new Set(['INPUT', 'SELECT', 'BUTTON', 'TEXTAREA']);
+<script context="module">import { initialClickPosition, tracking } from "../../stores";
+import { captureGroup } from "../../utils";
+import { getContext, onDestroy, onMount, setContext } from "svelte";
+import { createEventDispatcher } from "svelte";
+import { get, writable } from "svelte/store";
+const tagsToIgnore = /* @__PURE__ */ new Set(["INPUT", "SELECT", "BUTTON", "TEXTAREA"]);
 </script>
 
-<script>
-	const mounted = getContext('mounted');
-	const duplicate = getContext('duplicate');
-	const graphDOMElement = getContext('graphDOMElement');
-	const selectedEdgeStore = getContext('selectedEdgeStore');
-	const dispatch = createEventDispatcher();
-	export let node;
-	export let isDefault;
-	export let useDefaults;
-	export let center;
-	export let nodeStore;
-	export let locked;
-	export let groups;
-	export let maxZIndex;
-	export let centerPoint;
-	export let cursor;
-	export let initialNodePositions;
-	export let activeGroup;
-	export let editing;
-	export let dimensionsProvided = false;
-	export let title;
-	const anchorsMounted = writable(0);
-	const nodeConnectEvent = writable(null);
-	const id = node.id;
-	const position = node.position;
-	const widthStore = node.dimensions.width;
-	const heightStore = node.dimensions.height;
-	const selectionColor = node.selectionColor;
-	const editable = node.editable;
-	const nodeLock = node.locked;
-	const zIndex = node.zIndex;
-	const bgColor = node.bgColor;
-	const borderRadius = node.borderRadius;
-	const textColor = node.textColor;
-	const group = node.group;
-	const borderColor = node.borderColor;
-	const borderWidth = node.borderWidth;
-	const rotation = node.rotation;
-	const { selected: selectedNodeGroup, hidden: hiddenNodesGroup } = $groups;
-	const hiddenNodes = hiddenNodesGroup.nodes;
-	const selectedNodes = selectedNodeGroup.nodes;
-	const resized = writable(false);
-	$: actualPosition = $position;
-	let prevWidth = $widthStore;
-	let prevHeight = $heightStore;
-	$: selected = $selectedNodes.has(node);
-	$: hidden = $hiddenNodes.has(node);
-	$: fixedSizing = dimensionsProvided || $resized;
-	$: if ($widthStore !== prevWidth || $heightStore !== prevHeight) {
-		const oldDimensions = { width: prevWidth, height: prevHeight };
-		const newDimensions = { width: $widthStore, height: $heightStore };
-		dispatch('nodeDimensionsChanged', {
-			node,
-			nodeId: node.id.slice(2),
-			// Remove 'N-' prefix
-			oldDimensions,
-			newDimensions
-		});
-		prevWidth = $widthStore;
-		prevHeight = $heightStore;
-	}
-	$: if (selected && $duplicate) {
-		dispatch('duplicate', node);
-	}
-	setContext('node', node);
-	setContext('anchorsMounted', anchorsMounted);
-	setContext('resized', resized);
-	setContext('nodeConnectEvent', nodeConnectEvent);
-	onMount(() => {
-		if (center) {
-			const opticalCenter = {
-				x: $centerPoint.x - $widthStore / 2,
-				y: $centerPoint.y - $heightStore / 2
-			};
-			node.position.set(opticalCenter);
-			tracking.set(true);
-			tracking.set(false);
-		}
-		mounted.update((n) => n + 1);
-	});
-	onDestroy(() => {
-		if (selected) {
-			$selectedNodes.delete(node);
-			$selectedNodes = $selectedNodes;
-		}
-		mounted.update((n) => n - 1);
-	});
-	function toggleSelected() {
-		if (selected) {
-			if (node) $selectedNodes.delete(node);
-			$selectedNodes = $selectedNodes;
-		} else {
-			if (node) $selectedNodes.add(node);
-			$selectedNodes = $selectedNodes;
-		}
-	}
-	function handleNodeClicked(e) {
-		$initialClickPosition = get(cursor);
-		$graphDOMElement.focus();
-		if ($zIndex !== $maxZIndex && $zIndex !== Infinity) $zIndex = ++$maxZIndex;
-		const targetElement = e.target;
-		if (tagsToIgnore.has(targetElement.tagName)) return;
-		e.preventDefault();
-		dispatch('nodeClicked', { node, e });
-		if (selectedEdgeStore) {
-			console.log(
-				'\u{1F5B1}\uFE0F \u041A\u043B\u0438\u043A \u043F\u043E \u043D\u043E\u0434\u0435 - \u0441\u0431\u0440\u0430\u0441\u044B\u0432\u0430\u0435\u043C \u0432\u044B\u0434\u0435\u043B\u0435\u043D\u0438\u0435 \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u044F'
-			);
-			selectedEdgeStore.set(null);
-		}
-		if ($locked || $nodeLock) return;
-		if ('touches' in e) {
-			if (e.touches && e.touches.length > 1) return;
-		} else {
-			if (e.button === 2 && $editable) {
-				$editing = node;
-			}
-		}
-		$tracking = true;
-		nodeSelectLogic(e);
-	}
-	function nodeSelectLogic(e) {
-		let groupData;
-		let parent;
-		let isParent = false;
-		const nodeGroup = $group;
-		if (nodeGroup) {
-			groupData = $groups[nodeGroup];
-			parent = get(groupData.parent);
-			isParent = parent === node;
-		}
-		if (isParent) {
-			$activeGroup = nodeGroup;
-		} else {
-			$activeGroup = 'selected';
-		}
-		if (!e.shiftKey && selected) {
-			$activeGroup = 'selected';
-		} else {
-			if (!e.shiftKey && !selected && !e.shiftKey) {
-				$selectedNodes.clear();
-				$selectedNodes = $selectedNodes;
-			}
-			toggleSelected();
-		}
-		$initialNodePositions = captureGroup($groups['selected'].nodes);
-	}
-	function destroy() {
-		nodeStore.delete(id);
-	}
-	function onMouseUp(e) {
-		const cursorPosition = get(cursor);
-		const mouseDeltaX = cursorPosition.x - $initialClickPosition.x;
-		const mouseDeltaY = cursorPosition.y - $initialClickPosition.y;
-		const combinedDelta = Math.abs(mouseDeltaX) + Math.abs(mouseDeltaY);
-		if (combinedDelta < 4) dispatch('nodeReleased', { e, node });
-		$nodeConnectEvent = e;
-	}
-	function grabHandle(node2) {
-		node2.addEventListener('mousedown', handleNodeClicked);
-		node2.addEventListener('touchstart', handleNodeClicked);
-		return {
-			destroy() {
-				node2.removeEventListener('mousedown', handleNodeClicked);
-				node2.removeEventListener('touchstart', handleNodeClicked);
-			}
-		};
-	}
+<script>const mounted = getContext("mounted");
+const duplicate = getContext("duplicate");
+const graphDOMElement = getContext("graphDOMElement");
+const selectedEdgeStore = getContext("selectedEdgeStore");
+const dispatch = createEventDispatcher();
+export let node;
+export let isDefault;
+export let useDefaults;
+export let center;
+export let nodeStore;
+export let locked;
+export let groups;
+export let maxZIndex;
+export let centerPoint;
+export let cursor;
+export let initialNodePositions;
+export let activeGroup;
+export let editing;
+export let dimensionsProvided = false;
+export let title;
+const anchorsMounted = writable(0);
+const nodeConnectEvent = writable(null);
+const id = node.id;
+const position = node.position;
+const widthStore = node.dimensions.width;
+const heightStore = node.dimensions.height;
+const selectionColor = node.selectionColor;
+const editable = node.editable;
+const nodeLock = node.locked;
+const zIndex = node.zIndex;
+const bgColor = node.bgColor;
+const borderRadius = node.borderRadius;
+const textColor = node.textColor;
+const group = node.group;
+const borderColor = node.borderColor;
+const borderWidth = node.borderWidth;
+const rotation = node.rotation;
+const { selected: selectedNodeGroup, hidden: hiddenNodesGroup } = $groups;
+const hiddenNodes = hiddenNodesGroup.nodes;
+const selectedNodes = selectedNodeGroup.nodes;
+const resized = writable(false);
+$:
+  actualPosition = $position;
+let prevWidth = $widthStore;
+let prevHeight = $heightStore;
+$:
+  selected = $selectedNodes.has(node);
+$:
+  hidden = $hiddenNodes.has(node);
+$:
+  fixedSizing = dimensionsProvided || $resized;
+$:
+  if ($widthStore !== prevWidth || $heightStore !== prevHeight) {
+    const oldDimensions = { width: prevWidth, height: prevHeight };
+    const newDimensions = { width: $widthStore, height: $heightStore };
+    dispatch("nodeDimensionsChanged", {
+      node,
+      nodeId: node.id.slice(2),
+      // Remove 'N-' prefix
+      oldDimensions,
+      newDimensions
+    });
+    prevWidth = $widthStore;
+    prevHeight = $heightStore;
+  }
+$:
+  if (selected && $duplicate) {
+    dispatch("duplicate", node);
+  }
+setContext("node", node);
+setContext("anchorsMounted", anchorsMounted);
+setContext("resized", resized);
+setContext("nodeConnectEvent", nodeConnectEvent);
+onMount(() => {
+  if (center) {
+    const opticalCenter = {
+      x: $centerPoint.x - $widthStore / 2,
+      y: $centerPoint.y - $heightStore / 2
+    };
+    node.position.set(opticalCenter);
+    tracking.set(true);
+    tracking.set(false);
+  }
+  mounted.update((n) => n + 1);
+});
+onDestroy(() => {
+  if (selected) {
+    $selectedNodes.delete(node);
+    $selectedNodes = $selectedNodes;
+  }
+  mounted.update((n) => n - 1);
+});
+function toggleSelected() {
+  if (selected) {
+    if (node)
+      $selectedNodes.delete(node);
+    $selectedNodes = $selectedNodes;
+  } else {
+    if (node)
+      $selectedNodes.add(node);
+    $selectedNodes = $selectedNodes;
+  }
+}
+function handleNodeClicked(e) {
+  $initialClickPosition = get(cursor);
+  $graphDOMElement.focus();
+  if ($zIndex !== $maxZIndex && $zIndex !== Infinity)
+    $zIndex = ++$maxZIndex;
+  const targetElement = e.target;
+  if (tagsToIgnore.has(targetElement.tagName))
+    return;
+  e.preventDefault();
+  dispatch("nodeClicked", { node, e });
+  if (selectedEdgeStore) {
+    console.log("\u{1F5B1}\uFE0F \u041A\u043B\u0438\u043A \u043F\u043E \u043D\u043E\u0434\u0435 - \u0441\u0431\u0440\u0430\u0441\u044B\u0432\u0430\u0435\u043C \u0432\u044B\u0434\u0435\u043B\u0435\u043D\u0438\u0435 \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u044F");
+    selectedEdgeStore.set(null);
+  }
+  if ($locked || $nodeLock)
+    return;
+  if ("touches" in e) {
+    if (e.touches && e.touches.length > 1)
+      return;
+  } else {
+    if (e.button === 2 && $editable) {
+      $editing = node;
+    }
+  }
+  $tracking = true;
+  nodeSelectLogic(e);
+}
+function nodeSelectLogic(e) {
+  let groupData;
+  let parent;
+  let isParent = false;
+  const nodeGroup = $group;
+  if (nodeGroup) {
+    groupData = $groups[nodeGroup];
+    parent = get(groupData.parent);
+    isParent = parent === node;
+  }
+  if (isParent) {
+    $activeGroup = nodeGroup;
+  } else {
+    $activeGroup = "selected";
+  }
+  if (!e.shiftKey && selected) {
+    $activeGroup = "selected";
+  } else {
+    if (!e.shiftKey && !selected && !e.shiftKey) {
+      $selectedNodes.clear();
+      $selectedNodes = $selectedNodes;
+    }
+    toggleSelected();
+  }
+  $initialNodePositions = captureGroup($groups["selected"].nodes);
+}
+function destroy() {
+  nodeStore.delete(id);
+}
+function onMouseUp(e) {
+  const cursorPosition = get(cursor);
+  const mouseDeltaX = cursorPosition.x - $initialClickPosition.x;
+  const mouseDeltaY = cursorPosition.y - $initialClickPosition.y;
+  const combinedDelta = Math.abs(mouseDeltaX) + Math.abs(mouseDeltaY);
+  if (combinedDelta < 4)
+    dispatch("nodeReleased", { e, node });
+  $nodeConnectEvent = e;
+}
+function grabHandle(node2) {
+  node2.addEventListener("mousedown", handleNodeClicked);
+  node2.addEventListener("touchstart", handleNodeClicked);
+  return {
+    destroy() {
+      node2.removeEventListener("mousedown", handleNodeClicked);
+      node2.removeEventListener("touchstart", handleNodeClicked);
+    }
+  };
+}
 </script>
 
 {#if !hidden}

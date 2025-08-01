@@ -1,64 +1,86 @@
-<script>
-	import { getContext } from 'svelte';
-	import MiniNode from './MiniNode.svelte';
-	import MiniGroupBox from './MiniGroupBox.svelte';
-	import { calculateRelativeCursor } from '../../utils';
-	let graph = getContext('graph');
-	export let width = 100;
-	export let height = width;
-	export let mapColor = null;
-	export let nodeColor = null;
-	export let borderColor = null;
-	export let corner = 'SE';
-	export let hideable = false;
-	const buffer = 0.9;
-	const maxWidth = width * buffer;
-	const maxHeight = height * buffer;
-	const graphBounds = graph.bounds.graphBounds;
-	$: bounds = $graphBounds;
-	$: top = bounds.top;
-	$: left = bounds.left;
-	$: right = bounds.right;
-	$: bottom = bounds.bottom;
-	const nodes = graph.nodes;
-	const groups = graph.groups;
-	const transforms = graph.transforms;
-	const dimensions = graph.dimensions;
-	const hidden = $groups.hidden.nodes;
-	const scale = transforms.scale;
-	const translation = transforms.translation;
-	const groupBoxes = graph.groupBoxes;
-	$: graphWidth = $dimensions.width;
-	$: graphHeight = $dimensions.height;
-	$: boundsWidth = right - left;
-	$: boundsHeight = bottom - top;
-	$: boundsRatio = boundsWidth / boundsHeight;
-	$: minimapRatio = width / height;
-	$: window = calculateRelativeCursor(e, 0, 0, graphWidth, graphHeight, $scale, $translation);
-	$: windowWidth = graphWidth / boundsWidth / $scale;
-	$: windowHeight = graphHeight / boundsHeight / $scale;
-	$: windowTop = (window.y - top) / boundsHeight;
-	$: windowLeft = (window.x - left) / boundsWidth;
-	const e = { clientX: 0, clientY: 0 };
-	$: windowStyle = `
+<script>import { getContext } from "svelte";
+import MiniNode from "./MiniNode.svelte";
+import MiniGroupBox from "./MiniGroupBox.svelte";
+import { calculateRelativeCursor } from "../../utils";
+let graph = getContext("graph");
+export let width = 100;
+export let height = width;
+export let mapColor = null;
+export let nodeColor = null;
+export let borderColor = null;
+export let corner = "SE";
+export let hideable = false;
+const buffer = 0.9;
+const maxWidth = width * buffer;
+const maxHeight = height * buffer;
+const graphBounds = graph.bounds.graphBounds;
+$:
+  bounds = $graphBounds;
+$:
+  top = bounds.top;
+$:
+  left = bounds.left;
+$:
+  right = bounds.right;
+$:
+  bottom = bounds.bottom;
+const nodes = graph.nodes;
+const groups = graph.groups;
+const transforms = graph.transforms;
+const dimensions = graph.dimensions;
+const hidden = $groups.hidden.nodes;
+const scale = transforms.scale;
+const translation = transforms.translation;
+const groupBoxes = graph.groupBoxes;
+$:
+  graphWidth = $dimensions.width;
+$:
+  graphHeight = $dimensions.height;
+$:
+  boundsWidth = right - left;
+$:
+  boundsHeight = bottom - top;
+$:
+  boundsRatio = boundsWidth / boundsHeight;
+$:
+  minimapRatio = width / height;
+$:
+  window = calculateRelativeCursor(e, 0, 0, graphWidth, graphHeight, $scale, $translation);
+$:
+  windowWidth = graphWidth / boundsWidth / $scale;
+$:
+  windowHeight = graphHeight / boundsHeight / $scale;
+$:
+  windowTop = (window.y - top) / boundsHeight;
+$:
+  windowLeft = (window.x - left) / boundsWidth;
+const e = { clientX: 0, clientY: 0 };
+$:
+  windowStyle = `
 		top: ${windowTopPx + windowTop * scaledBoundsHeight}px;
 		left: ${windowLeftPx + windowLeft * scaledBoundsWidth}px;
 		width: ${windowWidth * scaledBoundsWidth}px;
 		height: ${windowHeight * scaledBoundsHeight}px;`;
-	$: landscape = boundsRatio >= minimapRatio;
-	$: boundsScale = landscape ? maxWidth / boundsWidth : maxHeight / boundsHeight;
-	$: windowLeftPx = (width - scaledBoundsWidth) / 2;
-	$: windowTopPx = (height - scaledBoundsHeight) / 2;
-	$: scaledBoundsWidth = boundsWidth * boundsScale;
-	$: scaledBoundsHeight = boundsHeight * boundsScale;
-	function toggleHidden(node) {
-		if ($hidden.has(node)) {
-			$hidden.delete(node);
-		} else {
-			$hidden.add(node);
-		}
-		$hidden = $hidden;
-	}
+$:
+  landscape = boundsRatio >= minimapRatio;
+$:
+  boundsScale = landscape ? maxWidth / boundsWidth : maxHeight / boundsHeight;
+$:
+  windowLeftPx = (width - scaledBoundsWidth) / 2;
+$:
+  windowTopPx = (height - scaledBoundsHeight) / 2;
+$:
+  scaledBoundsWidth = boundsWidth * boundsScale;
+$:
+  scaledBoundsHeight = boundsHeight * boundsScale;
+function toggleHidden(node) {
+  if ($hidden.has(node)) {
+    $hidden.delete(node);
+  } else {
+    $hidden.add(node);
+  }
+  $hidden = $hidden;
+}
 </script>
 
 <div

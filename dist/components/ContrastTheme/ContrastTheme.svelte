@@ -1,45 +1,44 @@
-<script>
-	export let contrastThemes = [
-		'Change Theme',
-		'Black/White',
-		'Yellow/Black',
-		'Black/Yellow',
-		'Black/Green',
-		'Blue/Yellow',
-		'Yellow/Blue',
-		'Grayscale',
-		'Black/Pink',
-		'Custom'
-	];
-	export let corner = 'NE';
-	export let bgColor = null;
-	export let textColor = null;
-	export let nodeColor = null;
-	export let edgeColor = null;
-	let current = contrastThemes[0];
-	let isCustomTheme = false;
-	function changeTheme(event) {
-		const selectedTheme = event.target.value;
-		if (selectedTheme === 'Custom') {
-			isCustomTheme = true;
-		} else {
-			isCustomTheme = false;
-			bgColor = null;
-			textColor = null;
-			nodeColor = null;
-			edgeColor = null;
-			current = selectedTheme;
-			document.documentElement.setAttribute('svelvet-theme', selectedTheme);
-			updateCustomTheme();
-		}
-		localStorage.setItem('currentTheme', current);
-	}
-	function updateCustomTheme() {
-		document.documentElement.style.setProperty('--default-background-color', bgColor);
-		document.documentElement.style.setProperty('--default-text-color', textColor);
-		document.documentElement.style.setProperty('--default-node-color', nodeColor);
-		document.documentElement.style.setProperty('--default-edge-color', edgeColor);
-	}
+<script>export let contrastThemes = [
+  "Change Theme",
+  "Black/White",
+  "Yellow/Black",
+  "Black/Yellow",
+  "Black/Green",
+  "Blue/Yellow",
+  "Yellow/Blue",
+  "Grayscale",
+  "Black/Pink",
+  "Custom"
+];
+export let corner = "NE";
+export let bgColor = null;
+export let textColor = null;
+export let nodeColor = null;
+export let edgeColor = null;
+let current = contrastThemes[0];
+let isCustomTheme = false;
+function changeTheme(event) {
+  const selectedTheme = event.target.value;
+  if (selectedTheme === "Custom") {
+    isCustomTheme = true;
+  } else {
+    isCustomTheme = false;
+    bgColor = null;
+    textColor = null;
+    nodeColor = null;
+    edgeColor = null;
+    current = selectedTheme;
+    document.documentElement.setAttribute("svelvet-theme", selectedTheme);
+    updateCustomTheme();
+  }
+  localStorage.setItem("currentTheme", current);
+}
+function updateCustomTheme() {
+  document.documentElement.style.setProperty("--default-background-color", bgColor);
+  document.documentElement.style.setProperty("--default-text-color", textColor);
+  document.documentElement.style.setProperty("--default-node-color", nodeColor);
+  document.documentElement.style.setProperty("--default-edge-color", edgeColor);
+}
 </script>
 
 <div class="contrast-wrapper" class:NE={corner === 'NE'} on:input={updateCustomTheme}>

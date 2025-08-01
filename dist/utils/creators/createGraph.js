@@ -7,71 +7,62 @@ import { createBoundsStore } from './createBoundsStore';
 import { calculateViewportCenter } from '../calculators/calculateViewPortCenter';
 // updated by team v.11.0
 export function createGraph(id, config) {
-	const {
-		zoom,
-		editable,
-		translation: initialTranslation,
-		direction,
-		locked,
-		edge,
-		nodes: initialNodes
-	} = config;
-	const translation = writable({
-		x: initialTranslation?.x || 0,
-		y: initialTranslation?.y || 0
-	});
-	const dimensions = writable({ top: 0, left: 0, width: 0, height: 0, bottom: 0, right: 0 });
-	const scale = writable(zoom);
-	const mounted = writable(false);
-	const nodes = createStore();
-	// 🔥 Agregar nodos iniciales antes de llamar a createBoundsStore()
-	// if (initialNodes) {
-	//     Object.values(initialNodes).forEach(node => nodes.add(node, node.id));
-	// }
-	// console.log("Nodos en el store después de agregar:", nodes.getAll());
-	// 🔥 Ahora sí, crear los bounds con nodos ya existentes
-	const bounds = createBoundsStore(nodes, dimensions, scale, translation);
-	const center = derived(
-		[dimensions, translation, scale],
-		([$dimensions, $translation, $scale]) => {
-			return calculateViewportCenter($dimensions, $translation, $scale);
-		}
-	);
-	const graph = {
-		id,
-		nodes,
-		edges: createEdgeStore(),
-		transforms: {
-			translation,
-			scale
-		},
-		maxZIndex: writable(2),
-		dimensions,
-		bounds,
-		center,
-		mounted,
-		direction: direction || 'LR',
-		editable: editable || false,
-		edge: edge || null,
-		editing: writable(null),
-		cursor: createDerivedCursorStore(cursorPositionRaw, dimensions, translation, scale),
-		locked: writable(locked || false),
-		groups: writable({
-			selected: { parent: writable(null), nodes: writable(new Set()) },
-			hidden: { parent: writable(null), nodes: writable(new Set()) }
-		}),
-		groupBoxes: createStore(),
-		activeGroup: writable(null),
-		initialNodePositions: writable([]),
-		getNodeDimensions: (nodeId) => {
-			const nodeKey =
-				typeof nodeId === 'string' && nodeId.slice(0, 2) === 'N-' ? nodeId : `N-${nodeId}`;
-			const node = nodes.get(nodeKey);
-			if (!node) return null;
-			const width = get(node.dimensions.width);
-			const height = get(node.dimensions.height);
-			return { width, height };
-		}
-	};
-	return graph;
+    const { zoom, editable, translation: initialTranslation, direction, locked, edge, nodes: initialNodes } = config;
+    const translation = writable({
+        x: initialTranslation?.x || 0,
+        y: initialTranslation?.y || 0
+    });
+    const dimensions = writable({ top: 0, left: 0, width: 0, height: 0, bottom: 0, right: 0 });
+    const scale = writable(zoom);
+    const mounted = writable(false);
+    const nodes = createStore();
+    // 🔥 Agregar nodos iniciales antes de llamar a createBoundsStore()
+    // if (initialNodes) {
+    //     Object.values(initialNodes).forEach(node => nodes.add(node, node.id));
+    // }
+    // console.log("Nodos en el store después de agregar:", nodes.getAll());
+    // 🔥 Ahora sí, crear los bounds con nodos ya existentes
+    const bounds = createBoundsStore(nodes, dimensions, scale, translation);
+    const center = derived([dimensions, translation, scale], ([$dimensions, $translation, $scale]) => {
+        return calculateViewportCenter($dimensions, $translation, $scale);
+    });
+    const graph = {
+        id,
+        nodes,
+        edges: createEdgeStore(),
+        transforms: {
+            translation,
+            scale
+        },
+        maxZIndex: writable(2),
+        dimensions,
+        bounds,
+        center,
+        mounted,
+        direction: direction || 'LR',
+        editable: editable || false,
+        edge: edge || null,
+        editing: writable(null),
+        cursor: createDerivedCursorStore(cursorPositionRaw, dimensions, translation, scale),
+        locked: writable(locked || false),
+        groups: writable({
+            selected: { parent: writable(null), nodes: writable(new Set()) },
+            hidden: { parent: writable(null), nodes: writable(new Set()) }
+        }),
+        groupBoxes: createStore(),
+        activeGroup: writable(null),
+        initialNodePositions: writable([]),
+        getNodeDimensions: (nodeId) => {
+            const nodeKey = typeof nodeId === 'string' && nodeId.slice(0, 2) === 'N-'
+                ? nodeId
+                : `N-${nodeId}`;
+            const node = nodes.get(nodeKey);
+            if (!node)
+                return null;
+            const width = get(node.dimensions.width);
+            const height = get(node.dimensions.height);
+            return { width, height };
+        }
+    };
+    return graph;
 }

@@ -1,160 +1,154 @@
-<script context="module">
-	import Graph from '../Graph/Graph.svelte';
-	import FlowChart from '../../components/FlowChart/FlowChart.svelte';
-	import { createEventDispatcher, onMount, setContext } from 'svelte';
-	import { createGraph } from '../../utils';
-	import { graphStore } from '../../stores';
-	import { reloadStore } from '../../utils/savers/reloadStore';
-	import { writable, get } from 'svelte/store';
-	import { tick } from 'svelte';
-	import Drawer from '../../components/Drawer/Drawer.svelte';
+<script context="module">import Graph from "../Graph/Graph.svelte";
+import FlowChart from "../../components/FlowChart/FlowChart.svelte";
+import { createEventDispatcher, onMount, setContext } from "svelte";
+import { createGraph } from "../../utils";
+import { graphStore } from "../../stores";
+import { reloadStore } from "../../utils/savers/reloadStore";
+import { writable, get } from "svelte/store";
+import { tick } from "svelte";
+import Drawer from "../../components/Drawer/Drawer.svelte";
 </script>
 
-<script>
-	export let mermaid = '';
-	export let theme = 'light';
-	export let id = 0;
-	export let snapTo = 0;
-	export let zoom = 1;
-	export let TD = false;
-	export let editable = true;
-	export let locked = false;
-	export let width = 0;
-	export let height = 0;
-	export let minimap = false;
-	export let controls = false;
-	export let toggle = false;
-	export let drawer = false;
-	export let contrast = false;
-	export let fitView = false;
-	export let selectionColor = 'lightblue';
-	export let edgeStyle = 'bezier';
-	export let endStyles = [null, null];
-	export let edge = null;
-	export let disableSelection = false;
-	export let mermaidConfig = {};
-	export let translation = { x: 0, y: 0 };
-	export let trackpadPan = false;
-	export let modifier = 'meta';
-	export let raiseEdgesOnSelect = false;
-	export let edgesAboveNode = false;
-	export let title = '';
-	export let fixedZoom = false;
-	export let pannable = true;
-	const dispatch = createEventDispatcher();
-	const selectedEdgeStore = writable(null);
-	export let graph = null;
-	let direction = TD ? 'TD' : 'LR';
-	let graphKey = `G-${id || Date.now()}`;
-	graph = createGraph(graphKey, { zoom, direction, editable, locked, translation });
-	graphStore.add(graph, graphKey);
-	setContext('snapTo', snapTo);
-	setContext('edgeStyle', edgeStyle);
-	setContext('endStyles', endStyles);
-	setContext('graphEdge', edge);
-	setContext('raiseEdgesOnSelect', raiseEdgesOnSelect);
-	setContext('edgesAboveNode', edgesAboveNode);
-	setContext('graph', graph);
-	setContext('selectedEdgeStore', selectedEdgeStore);
-	function handleKeyDown(event) {
-		if ((event.key === 'Delete' || event.key === 'Backspace') && graph) {
-			const selectedEdgeId = $selectedEdgeStore;
-			if (selectedEdgeId) {
-				try {
-					const allEdges = edgeStore.getAll();
-					const targetEdge = allEdges.find((edge2) => edge2.id === selectedEdgeId);
-					if (targetEdge) {
-						const edgeKeys = edgeStore.match(targetEdge.source, targetEdge.target);
-						if (edgeKeys.length > 0) {
-							const deleted = edgeStore.delete(edgeKeys[0]);
-							if (deleted) {
-								selectedEdgeStore.set(null);
-							}
-						}
-					}
-				} catch (error) {}
-			}
-		}
-		if (event.key === 'Escape') {
-			selectedEdgeStore.set(null);
-		}
-	}
-	function handleBackgroundClick(event) {
-		const target = event.target;
-		const isEdgeClick =
-			target.closest('.edge-wrapper') ||
-			target.closest('[data-edge-id]') ||
-			target.tagName === 'path' ||
-			target.classList.contains('edge-path') ||
-			target.classList.contains('edge-click-area');
-		const isNodeClick =
-			target.closest('.svelvet-node') ||
-			target.closest('[id^="N-"]') ||
-			target.closest('.node-wrapper') ||
-			target.closest('[data-node-id]');
-		const isAnchorClick =
-			target.closest('.anchor') || target.closest('[id^="A-"]') || target.closest('[data-anchor]');
-		console.log(
-			`\u{1F5B1}\uFE0F \u041A\u043B\u0438\u043A \u043D\u0430 \u0433\u0440\u0430\u0444\u0435:`,
-			{
-				target: target.tagName,
-				className: target.className,
-				isEdgeClick,
-				isNodeClick,
-				isAnchorClick
-			}
-		);
-		if (!isEdgeClick && !isNodeClick && !isAnchorClick) {
-			console.log(
-				`\u{1F504} \u0421\u0431\u0440\u0430\u0441\u044B\u0432\u0430\u0435\u043C \u0432\u044B\u0434\u0435\u043B\u0435\u043D\u0438\u0435 \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u044F \u043F\u0440\u0438 \u043A\u043B\u0438\u043A\u0435 \u043D\u0430 \u0444\u043E\u043D`
-			);
-			selectedEdgeStore.set(null);
-		}
-	}
-	onMount(() => {
-		console.log('Graph component mounted with drawer:', drawer);
-		const stateObject = localStorage.getItem('state');
-		console.log('stateObject during onMount:', stateObject);
-		if (stateObject && graph) {
-			const reloadedGraph = reloadStore(stateObject);
-			console.log('Este es el graph seteado mediante reloadStore(stateObject)', reloadedGraph);
-			graph = reloadedGraph;
-			graphStore.add(graph, graph.id);
-			console.log('graphStore actualizado', graph);
-		}
-		document.addEventListener('keydown', handleKeyDown);
-		return () => {
-			document.removeEventListener('keydown', handleKeyDown);
-		};
-	});
-	$: backgroundExists = $$slots.background;
-	$: edgeStore = graph && graph.edges;
-	$: if (graph) graph.transforms.scale.set(zoom);
-	$: if (edgeStore) {
-		edgeStore.onEdgeChange((edge2, type) => {
-			dispatch(type, {
-				sourceAnchor: edge2.source,
-				targetAnchor: edge2.target,
-				sourceNode: edge2.source.node,
-				targetNode: edge2.target.node
-			});
-		});
-	}
-	export function disconnect(source, target) {
-		const sourceNodeKey = `N-${source[0]}`;
-		const sourceNode = graph.nodes.get(sourceNodeKey);
-		if (!sourceNode) return;
-		const sourceAnchor = sourceNode.anchors.get(`A-${source[1]}/N-${source[0]}`);
-		if (!sourceAnchor) return;
-		const targetNodeKey = `N-${target[0]}`;
-		const targetNode = graph.nodes.get(targetNodeKey);
-		if (!targetNode) return;
-		const targetAnchor = targetNode.anchors.get(`A-${target[1]}/N-${target[0]}`);
-		if (!targetAnchor) return;
-		const edgeKey = graph.edges.match(sourceAnchor, targetAnchor);
-		if (!edgeKey) return;
-		graph.edges.delete(edgeKey[0]);
-	}
+<script>export let mermaid = "";
+export let theme = "light";
+export let id = 0;
+export let snapTo = 0;
+export let zoom = 1;
+export let TD = false;
+export let editable = true;
+export let locked = false;
+export let width = 0;
+export let height = 0;
+export let minimap = false;
+export let controls = false;
+export let toggle = false;
+export let drawer = false;
+export let contrast = false;
+export let fitView = false;
+export let selectionColor = "lightblue";
+export let edgeStyle = "bezier";
+export let endStyles = [null, null];
+export let edge = null;
+export let disableSelection = false;
+export let mermaidConfig = {};
+export let translation = { x: 0, y: 0 };
+export let trackpadPan = false;
+export let modifier = "meta";
+export let raiseEdgesOnSelect = false;
+export let edgesAboveNode = false;
+export let title = "";
+export let fixedZoom = false;
+export let pannable = true;
+const dispatch = createEventDispatcher();
+const selectedEdgeStore = writable(null);
+export let graph = null;
+let direction = TD ? "TD" : "LR";
+let graphKey = `G-${id || Date.now()}`;
+graph = createGraph(graphKey, { zoom, direction, editable, locked, translation });
+graphStore.add(graph, graphKey);
+setContext("snapTo", snapTo);
+setContext("edgeStyle", edgeStyle);
+setContext("endStyles", endStyles);
+setContext("graphEdge", edge);
+setContext("raiseEdgesOnSelect", raiseEdgesOnSelect);
+setContext("edgesAboveNode", edgesAboveNode);
+setContext("graph", graph);
+setContext("selectedEdgeStore", selectedEdgeStore);
+function handleKeyDown(event) {
+  if ((event.key === "Delete" || event.key === "Backspace") && graph) {
+    const selectedEdgeId = $selectedEdgeStore;
+    if (selectedEdgeId) {
+      try {
+        const allEdges = edgeStore.getAll();
+        const targetEdge = allEdges.find((edge2) => edge2.id === selectedEdgeId);
+        if (targetEdge) {
+          const edgeKeys = edgeStore.match(targetEdge.source, targetEdge.target);
+          if (edgeKeys.length > 0) {
+            const deleted = edgeStore.delete(edgeKeys[0]);
+            if (deleted) {
+              selectedEdgeStore.set(null);
+            }
+          }
+        }
+      } catch (error) {
+      }
+    }
+  }
+  if (event.key === "Escape") {
+    selectedEdgeStore.set(null);
+  }
+}
+function handleBackgroundClick(event) {
+  const target = event.target;
+  const isEdgeClick = target.closest(".edge-wrapper") || target.closest("[data-edge-id]") || target.tagName === "path" || target.classList.contains("edge-path") || target.classList.contains("edge-click-area");
+  const isNodeClick = target.closest(".svelvet-node") || target.closest('[id^="N-"]') || target.closest(".node-wrapper") || target.closest("[data-node-id]");
+  const isAnchorClick = target.closest(".anchor") || target.closest('[id^="A-"]') || target.closest("[data-anchor]");
+  console.log(`\u{1F5B1}\uFE0F \u041A\u043B\u0438\u043A \u043D\u0430 \u0433\u0440\u0430\u0444\u0435:`, {
+    target: target.tagName,
+    className: target.className,
+    isEdgeClick,
+    isNodeClick,
+    isAnchorClick
+  });
+  if (!isEdgeClick && !isNodeClick && !isAnchorClick) {
+    console.log(`\u{1F504} \u0421\u0431\u0440\u0430\u0441\u044B\u0432\u0430\u0435\u043C \u0432\u044B\u0434\u0435\u043B\u0435\u043D\u0438\u0435 \u0441\u043E\u0435\u0434\u0438\u043D\u0435\u043D\u0438\u044F \u043F\u0440\u0438 \u043A\u043B\u0438\u043A\u0435 \u043D\u0430 \u0444\u043E\u043D`);
+    selectedEdgeStore.set(null);
+  }
+}
+onMount(() => {
+  console.log("Graph component mounted with drawer:", drawer);
+  const stateObject = localStorage.getItem("state");
+  console.log("stateObject during onMount:", stateObject);
+  if (stateObject && graph) {
+    const reloadedGraph = reloadStore(stateObject);
+    console.log("Este es el graph seteado mediante reloadStore(stateObject)", reloadedGraph);
+    graph = reloadedGraph;
+    graphStore.add(graph, graph.id);
+    console.log("graphStore actualizado", graph);
+  }
+  document.addEventListener("keydown", handleKeyDown);
+  return () => {
+    document.removeEventListener("keydown", handleKeyDown);
+  };
+});
+$:
+  backgroundExists = $$slots.background;
+$:
+  edgeStore = graph && graph.edges;
+$:
+  if (graph)
+    graph.transforms.scale.set(zoom);
+$:
+  if (edgeStore) {
+    edgeStore.onEdgeChange((edge2, type) => {
+      dispatch(type, {
+        sourceAnchor: edge2.source,
+        targetAnchor: edge2.target,
+        sourceNode: edge2.source.node,
+        targetNode: edge2.target.node
+      });
+    });
+  }
+export function disconnect(source, target) {
+  const sourceNodeKey = `N-${source[0]}`;
+  const sourceNode = graph.nodes.get(sourceNodeKey);
+  if (!sourceNode)
+    return;
+  const sourceAnchor = sourceNode.anchors.get(`A-${source[1]}/N-${source[0]}`);
+  if (!sourceAnchor)
+    return;
+  const targetNodeKey = `N-${target[0]}`;
+  const targetNode = graph.nodes.get(targetNodeKey);
+  if (!targetNode)
+    return;
+  const targetAnchor = targetNode.anchors.get(`A-${target[1]}/N-${target[0]}`);
+  if (!targetAnchor)
+    return;
+  const edgeKey = graph.edges.match(sourceAnchor, targetAnchor);
+  if (!edgeKey)
+    return;
+  graph.edges.delete(edgeKey[0]);
+}
 </script>
 
 <!-- Aqui se renderiza el grafico -->
